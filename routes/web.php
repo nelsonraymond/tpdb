@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\ProductVariantController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CustomerAuthController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
@@ -55,12 +57,20 @@ Route::middleware('auth')->group(function () {
     // Customer Order History & Detail
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+
+    // Customer Payment (ownership enforced in controller/service)
+    Route::get('/orders/{order}/payment', [PaymentController::class, 'show'])->name('payments.show');
+    Route::post('/orders/{order}/payment/simulate', [PaymentController::class, 'simulate'])->name('payments.simulate');
 
     // Wishlist Routes (Authenticated Customers)
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/{product}/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
     Route::delete('/wishlist/{product}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
 });
+
+// Payment Gateway Webhook (public; CSRF-excluded in bootstrap/app.php; signature verified in service)
+Route::post('/webhooks/payment', [PaymentController::class, 'webhook'])->name('payments.webhook');
 
 // Shopping Cart Routes (Guests and Customers)
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -79,6 +89,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('logout');
+
+        // Order Management (state machine enforced by OrderService)
+        Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+        Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
+        Route::post('/orders/{order}/cancel', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
 
         // Category Management
         Route::resource('categories', CategoryController::class)->except(['show']);

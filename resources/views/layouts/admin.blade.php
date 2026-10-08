@@ -53,6 +53,12 @@
                 Produk
             </a>
 
+            <a href="{{ route('admin.orders.index') }}"
+                class="flex items-center px-3.5 py-2.5 text-sm font-medium rounded-xl transition {{ request()->routeIs('admin.orders.*') ? 'bg-pink-50 text-[#D98FAF] font-semibold' : 'text-[#75686D] hover:bg-[#FFF9F5] hover:text-[#3A3033]' }}">
+                <svg class="w-5 h-5 mr-3 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                Pesanan
+            </a>
+
             <div class="pt-4 mt-4 border-t border-[#EBDDE2]">
                 <a href="{{ route('shop.index') }}" target="_blank"
                     class="flex items-center px-3.5 py-2.5 text-xs text-[#75686D] hover:text-[#3A3033] hover:bg-[#FFF9F5] rounded-xl transition">
