@@ -34,6 +34,12 @@ body {
     font-family: var(--font-display);
 }
 
+/* Editorial hero headline scale per DESIGN.md §6: clamp(2.5rem, 7vw, 5.5rem) */
+.hero-display {
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    line-height: 1.08;
+}
+
 /* Elegant, subtle motion per DESIGN.md §30 (200–400ms ease-out) */
 @media (prefers-reduced-motion: no-preference) {
     .mutya-rise {
