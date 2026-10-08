@@ -1,8 +1,1 @@
-# Dependencies
-node_modules/
-
-# Environment
-.env
-
-# Build artifacts
-public/build/
+(empty)

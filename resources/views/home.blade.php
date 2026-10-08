@@ -45,24 +45,51 @@
                     </p>
                 </div>
 
-                {{-- Editorial media panel — 4:5, dominant on mobile (§16), no heavy border --}}
-                <div class="mx-auto w-full max-w-sm md:max-w-none">
+                {{-- Editorial media panel — 4:5 (compact on mobile so the headline is reached sooner), no heavy border --}}
+                <div class="mx-auto w-full max-w-[16.5rem] sm:max-w-[20rem] md:max-w-none">
                     <div class="relative aspect-4/5 rounded-2xl overflow-hidden bg-pink-soft/30 shadow-card">
                         @php $heroProduct = $featuredProducts->first(); $heroImg = $heroProduct?->primaryImage(); @endphp
                         @if ($heroImg)
                             <img src="{{ Storage::url($heroImg->image_path) }}"
                                 alt="{{ $heroProduct->name }}" class="absolute inset-0 w-full h-full object-cover">
                         @else
-                            {{-- Placeholder treatment — replace with real photography later --}}
-                            <div class="absolute inset-0 bg-gradient-to-br from-pink-soft/50 via-white to-cream"></div>
-                            <svg class="pointer-events-none absolute inset-0 m-auto w-40 h-40 sm:w-48 sm:h-48 text-pink-mauve opacity-25"
-                                viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
-                                <path d="M50 92 C50 66 50 44 50 22"/>
-                                <path d="M50 58 C35 53 28 41 30 28 C45 33 52 45 50 58Z"/>
-                                <path d="M50 48 C65 43 72 31 70 18 C55 23 48 35 50 48Z"/>
-                                <circle cx="50" cy="16" r="5"/><circle cx="42" cy="12" r="3.5"/><circle cx="58" cy="12" r="3.5"/>
+                            {{-- Soft-light studio backdrop — swap this whole block for a real campaign photo later --}}
+                            <div class="absolute inset-0 bg-gradient-to-b from-cream via-white to-pink-soft/40"></div>
+                            <div class="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 w-[130%] aspect-square rounded-full bg-white/70 blur-3xl"></div>
+                            <div class="pointer-events-none absolute -bottom-24 -right-16 w-72 aspect-square rounded-full bg-pink-soft/40 blur-3xl"></div>
+                            {{-- Draped fabric folds — abstract silk-scarf composition --}}
+                            <svg class="absolute inset-0 w-full h-full text-pink-mauve" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="mutya-drape-a" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0" stop-color="#F8C8DC" stop-opacity="0.55"/>
+                                        <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.25"/>
+                                    </linearGradient>
+                                    <linearGradient id="mutya-drape-b" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0" stop-color="#EFA7C1" stop-opacity="0.45"/>
+                                        <stop offset="1" stop-color="#FFF9F5" stop-opacity="0.20"/>
+                                    </linearGradient>
+                                    <linearGradient id="mutya-drape-c" x1="0" y1="0" x2="0.6" y2="1">
+                                        <stop offset="0" stop-color="#B97897" stop-opacity="0.28"/>
+                                        <stop offset="1" stop-color="#F8C8DC" stop-opacity="0.12"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M-20 110 C 90 60 170 160 260 110 C 330 72 380 120 420 90 L 420 -20 L -20 -20 Z" fill="url(#mutya-drape-a)" stroke="none"/>
+                                <path d="M-20 235 C 80 180 190 285 290 225 C 350 190 400 240 420 210 L 420 128 C 380 158 330 110 260 148 C 170 198 90 98 -20 148 Z" fill="url(#mutya-drape-b)" stroke="none"/>
+                                <path d="M-20 372 C 90 315 200 420 300 358 C 355 325 400 372 420 345 L 420 250 C 400 280 350 230 290 265 C 190 325 80 222 -20 277 Z" fill="url(#mutya-drape-c)" stroke="none"/>
+                                <path d="M-20 520 C 90 450 205 545 310 480 C 360 450 400 486 420 462 L 420 520 Z" fill="#D98FAF" fill-opacity="0.16" stroke="none"/>
+                                {{-- Fine fold lines --}}
+                                <path d="M30 150 C 110 108 175 195 265 150" opacity="0.22"/>
+                                <path d="M15 285 C 100 232 205 330 300 272" opacity="0.20"/>
+                                <path d="M40 410 C 130 355 230 448 330 392" opacity="0.18"/>
                             </svg>
-                            <p class="absolute bottom-6 inset-x-0 text-center font-display italic text-base sm:text-lg text-pink-mauve">
+                            {{-- Delicate botanical sprig echoing the section corner ornaments --}}
+                            <svg class="pointer-events-none absolute top-8 right-7 w-24 h-24 sm:w-28 sm:h-28 text-pink-mauve opacity-30"
+                                viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+                                <path d="M78 96 C80 72 82 52 92 30"/>
+                                <path d="M82 66 C70 62 64 52 66 40 C78 46 84 58 82 66Z"/>
+                                <circle cx="93" cy="24" r="5"/><circle cx="85" cy="18" r="3.5"/><circle cx="99" cy="18" r="3.5"/>
+                            </svg>
+                            <p class="absolute bottom-20 inset-x-0 text-center font-display italic text-sm sm:text-base text-pink-mauve/70">
                                 Elegance in every detail.
                             </p>
                         @endif
