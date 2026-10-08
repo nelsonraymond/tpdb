@@ -1,90 +1,177 @@
-# DESIGN.md — Hijab E-Commerce Website
+# DESIGN.md — MUTYA STOREFRONT DESIGN SYSTEM v2
 
-## 1. Design Overview
+> **Purpose:** Visual source of truth for the Mutya hijab e-commerce storefront.
+>
+> **Brand:** Mutya
+>
+> **Direction:** Soft Luxury Feminine + Editorial Fashion Commerce
+>
+> **Stack:** Laravel 13 + Blade + Tailwind CSS v4
+>
+> **Implementation rule:** Read this file before creating or modifying customer-facing UI.
 
-This document defines the visual and interaction system for the hijab e-commerce website.
+---
 
-### Brand Direction
+# 1. DESIGN NORTH STAR
 
-The website should feel:
+Mutya should feel like a **real Indonesian hijab fashion brand**, not a Laravel template and not a generic marketplace.
 
+The previous design direction remains correct in its brand fundamentals:
+
+- Pink
+- Cream
 - Feminine
+- Floral
 - Elegant
-- Soft
-- Modern
 - Premium
-- Warm
-- Clean
-- Trustworthy
-- Aesthetic
 
-Core visual concept:
+However, the UI must become more **editorial, confident, visual, and commerce-focused**.
 
-> **Soft Luxury Feminine — a modern hijab boutique with subtle floral details.**
+## Core visual statement
 
-The design must NOT look childish, overly cute, overly pink, or like a generic marketplace.
+> **Soft femininity with a modern editorial fashion-store experience.**
 
-The overall impression should be similar to a premium Indonesian fashion boutique.
+Think:
 
----
+```text
+Premium modest-fashion editorial
+        +
+Modern Indonesian e-commerce
+        +
+Subtle botanical identity
+```
 
-# 2. Design Principles
+Do NOT make the site feel like:
 
-## 2.1 Clean First
+```text
+❌ Generic CRUD dashboard
+❌ Marketplace clone
+❌ Pink children's website
+❌ Bubble-heavy SaaS UI
+❌ Every section inside a rounded white card
+❌ Floral decoration everywhere
+```
 
-Prioritize product visibility and readability.
+The brand personality should be:
 
-Do:
-- Use generous whitespace.
-- Keep layouts simple.
-- Use clear visual hierarchy.
-- Let product photography become the main visual focus.
-
-Don't:
-- Overdecorate every section.
-- Use too many colors.
-- Put floral illustrations behind important text.
-- Use excessive shadows or gradients.
-
-## 2.2 Feminine but Mature
-
-Use pink as a brand identity, not as the only color.
-
-The visual language should feel suitable for women aged approximately 17–35.
-
-Avoid:
-- Cartoon flowers
-- Excessive hearts
-- Bubble-style UI
-- Neon pink
-- Childish illustrations
-
-Prefer:
-- Botanical line-art
-- Rose/petite flower illustrations
-- Soft curves
-- Editorial photography
-- Elegant serif headings
-
-## 2.3 Product Is the Hero
-
-The products must always receive more attention than decorative elements.
-
-Priority hierarchy:
-
-1. Product
-2. Product name / price
-3. CTA
-4. Supporting information
-5. Decoration
+```text
+GRACEFUL
+CONFIDENT
+SOFT
+MODERN
+FASHIONABLE
+WARM
+TRUSTWORTHY
+```
 
 ---
 
-# 3. Color System
+# 2. DESIGN BENCHMARK / REFERENCE DIRECTION
 
-Use CSS variables or Tailwind theme tokens so colors are easy to change globally.
+The following websites are references for **information architecture, merchandising, editorial composition, and shopping experience only**.
 
-## Primary Colors
+Do not copy their branding, logo, typography, images, copy, or exact layouts.
+
+## Lozy
+
+Reference:
+https://lozy.id/
+
+Useful lessons:
+- Strong product/category merchandising.
+- Large product taxonomy makes it easy to browse by material/series.
+- Best Seller and product-group navigation are prominent.
+- The store feels like a fashion catalog rather than a generic shop grid.
+
+Source observed from the current site: extensive navigation around product families such as Paris, Voal, Rayon, Viscose, Tencel, Silk, Jersey, and Ceruty, plus Best Seller groupings. 
+
+## Elzatta
+
+Reference:
+https://elzatta.com/
+
+Useful lessons:
+- Strong editorial product storytelling.
+- Product photography receives large visual space.
+- Product pages explain comfort, coverage, material, finishing, and color choice.
+- Shopping is supported by useful decision aids such as color/undertone guidance.
+- Hero/product storytelling is more editorial than a basic product grid.
+
+Source observed from the current site: hero product storytelling, feature blocks for Comfort/Coverage/Material/Finishing, color discovery, and an undertone guide. 
+
+## Kenan Hijab
+
+Reference:
+https://kenanhijab.co.id/home/
+
+Useful lessons:
+- Promotional merchandising is visually prominent.
+- Product cards communicate sale pricing clearly.
+- New Arrival and Popular product groups create shopping momentum.
+- Editorial/news and brand activity are mixed with commerce content.
+- The homepage combines products, promotions, social proof/brand activity, and offline-store information.
+
+Source observed from the current site: promotional product sections, New Arrival/Popular groupings, offline-store links, and editorial/news content. 
+
+## Mutya decision
+
+Borrow the **principles**, not the identity:
+
+```text
+Lozy:
+Category depth + merchandising
+
+Elzatta:
+Editorial storytelling + product education
+
+Kenan:
+Promotion + new arrivals + brand activity
+
+Mutya:
+Soft luxury + floral identity + clean editorial commerce
+```
+
+---
+
+# 3. VISUAL HIERARCHY
+
+The old system was too card-heavy.
+
+New rule:
+
+> **Not every section needs a card.**
+
+Use a mixture of:
+
+- full-bleed image sections
+- editorial split layouts
+- product grids
+- soft-background sections
+- whitespace-led sections
+- thin dividers
+- floating badges
+- occasional cards
+
+## Visual priority
+
+```text
+1. Fashion/product photography
+2. Brand message
+3. Product information
+4. CTA
+5. Supporting UI
+6. Decoration
+```
+
+Floral decoration is always last in priority.
+
+---
+
+# 4. COLOR SYSTEM — KEEP THE BRAND
+
+The brand colors remain unchanged.
+
+## Primary
 
 ```text
 --primary-pink: #EFA7C1
@@ -92,7 +179,7 @@ Use CSS variables or Tailwind theme tokens so colors are easy to change globally
 --soft-pink: #F8C8DC
 ```
 
-## Neutral Colors
+## Neutrals
 
 ```text
 --cream: #FFF9F5
@@ -110,37 +197,86 @@ Use CSS variables or Tailwind theme tokens so colors are easy to change globally
 --mauve: #B97897
 ```
 
-## Recommended Usage
+## Color ratios
 
-- Background: `#FFF9F5` or `#FFFFFF`
-- Primary CTA: `#D98FAF`
-- Secondary CTA / hover: `#B97897`
-- Soft section background: `#F8C8DC`
-- Main text: `#3A3033`
-- Secondary text: `#75686D`
-- Borders: `#EBDDE2`
-- Premium highlight: `#C9A227`
+Approximate visual balance:
 
-### Color Rule
+```text
+50–60% white / cream
+20–25% photography / natural product colors
+10–15% soft pink
+5–10% deep pink / mauve
+<5% gold
+```
 
-Use approximately:
+## Important change
 
-- 60% white/cream
-- 25% soft pink
-- 10% dusty/deep pink
-- 5% accent gold
+Do NOT tint every element pink.
 
-Pink should support the layout rather than dominate it.
+Pink should identify:
+- CTA
+- active state
+- selected state
+- editorial highlights
+- small brand accents
+
+Cream and white must dominate the canvas.
 
 ---
 
-# 4. Typography
+# 5. ART DIRECTION
 
-Use a premium serif + clean sans-serif combination.
+This is the biggest visual upgrade.
 
-## Primary Heading Font
+## Photography direction
 
-Preferred:
+Prefer:
+
+- editorial hijab photography
+- soft daylight
+- natural skin tones
+- textured fabric close-ups
+- clean studio product shots
+- warm neutral environments
+- sophisticated female styling
+- movement in fabric
+- close-up details
+
+## Avoid
+
+- generic stock photography
+- overly posed corporate images
+- oversaturated pink photos
+- heavy artificial glow
+- unrealistic AI-looking model imagery
+- busy backgrounds
+
+## Product imagery
+
+Product photos should feel consistent:
+
+```text
+4:5 ratio
+soft light
+neutral background
+accurate color
+consistent crop
+```
+
+Where multiple images exist:
+
+1. hero/product image
+2. lifestyle image
+3. close-up material image
+4. color/variant image
+
+---
+
+# 6. TYPOGRAPHY
+
+## Display / Editorial
+
+Primary:
 
 ```text
 Playfair Display
@@ -153,14 +289,16 @@ Cormorant Garamond
 ```
 
 Use for:
-- Hero headline
-- Section headings
-- Brand statements
-- Promotional headings
 
-## Body/UI Font
+- hero headline
+- editorial statements
+- section headlines
+- campaign headlines
+- product storytelling headlines
 
-Preferred:
+## UI / Commerce
+
+Primary:
 
 ```text
 Poppins
@@ -173,1158 +311,1188 @@ Inter
 ```
 
 Use for:
-- Product names
-- Navigation
-- Buttons
-- Labels
-- Forms
-- Prices
-- Body copy
 
-## Typography Rules
+- navigation
+- prices
+- buttons
+- filters
+- forms
+- product metadata
+- badges
 
-Heading:
-- Elegant
-- High contrast
-- Never overly bold
+## Typography hierarchy
 
-Body:
-- Clean
-- Highly readable
-- Medium line height
-
-Buttons:
-- Sans-serif
-- Medium/semibold
-- Clear text
-
-Example:
-
+Hero:
 ```text
-Elegance in Every Wrap
+clamp(2.5rem, 7vw, 5.5rem)
 ```
 
-"Elegance in Every Wrap" should use the serif font.
+Section heading:
+```text
+clamp(1.75rem, 4vw, 3.25rem)
+```
+
+Product title:
+```text
+0.95rem – 1.05rem
+```
+
+Product price:
+```text
+0.95rem – 1.1rem
+```
+
+Micro-label:
+```text
+0.65rem – 0.75rem
+```
+
+Use letter-spacing carefully.
+
+Do NOT make every heading bold.
 
 ---
 
-# 5. Logo & Brand Mark
+# 7. LAYOUT PHILOSOPHY
 
-Logo direction:
+## Container
 
-- Minimal wordmark
-- Elegant serif typography
-- Optional tiny floral symbol
-- No complicated icon
-
-Recommended appearance:
+Desktop:
 
 ```text
-[small floral mark]
-BRAND NAME
+max-width: 1280px
 ```
 
-The logo should work on:
-- White background
-- Cream background
-- Pink background
+Wide editorial sections may use:
 
-Use deep pink or dark charcoal for the primary logo.
+```text
+max-width: 1440px
+```
+
+Mobile:
+
+```text
+padding-inline: 16px
+```
+
+Tablet:
+
+```text
+padding-inline: 24px
+```
+
+Desktop:
+
+```text
+padding-inline: 32px
+```
+
+## Grid
+
+Prefer asymmetric layouts where useful.
+
+Examples:
+
+```text
+2/5 + 3/5
+3/5 + 2/5
+1/3 + 2/3
+```
+
+Do not make every section a 50/50 split.
 
 ---
 
-# 6. Floral Design System
+# 8. SPACING
 
-Floral elements are a supporting visual language.
+Base rhythm:
 
-## Approved Floral Elements
+```text
+4
+8
+12
+16
+20
+24
+32
+40
+48
+64
+80
+96
+120
+```
 
-Use:
-- Rose line-art
-- Peony line-art
-- Small flowers
-- Botanical leaves
-- Thin stems
-- Petal silhouettes
-- Soft floral patterns
-- Hand-drawn botanical accents
+Homepage section spacing:
+
+Desktop:
+```text
+80–120px
+```
+
+Mobile:
+```text
+56–72px
+```
+
+Product grids:
+```text
+16–24px
+```
+
+Editorial sections:
+```text
+64–96px
+```
+
+Whitespace should feel intentional and luxurious.
+
+---
+
+# 9. BORDER RADIUS
+
+The previous UI overused rounded containers.
+
+New rule:
+
+> **Use radius strategically, not everywhere.**
+
+Recommended:
+
+```text
+Image/media: 16–20px
+Product cards: 12–16px
+Buttons: 10–12px
+Input: 10–12px
+Pills: 9999px
+Editorial section: often NO container radius
+```
+
+Large hero sections may use square/soft corners instead of a giant rounded rectangle.
+
+---
+
+# 10. SHADOWS
+
+Prefer depth through:
+
+- whitespace
+- contrast
+- image composition
+- subtle borders
+
+Default:
+
+```text
+0 8px 30px rgba(58, 48, 51, 0.05)
+```
+
+Hover:
+
+```text
+0 14px 40px rgba(58, 48, 51, 0.09)
+```
+
+Do not use shadows on every section.
+
+---
+
+# 11. FLORAL SYSTEM — MORE REFINED
+
+Floral decoration stays, but becomes more sophisticated.
+
+## Preferred
+
+- botanical line-art
+- fine rose outlines
+- thin stems
+- petal silhouettes
+- hand-drawn botanical sketches
+- pressed-flower inspired elements
+- small floral marks
 
 ## Placement
 
-Good locations:
-- Hero corners
-- Section corners
-- Promotional banner
-- Footer
-- Empty states
-- Decorative separators
-- Around headings
-- Background edges
+Best:
 
-Avoid placing flowers:
-- Over product images
-- Behind CTA text
-- Over navigation
-- Over form inputs
+- hero edge
+- campaign section edge
+- footer corner
+- editorial image overlay at very low opacity
+- empty states
+- divider accents
 
-## Floral Style
+Avoid:
 
-Flowers should be:
-- Thin-line
-- Soft
-- Elegant
-- Slightly imperfect / organic
-- Low contrast
+- repeating flowers on every card
+- flowers next to every heading
+- flowers behind product prices
+- flowers over buttons
 
-Floral opacity:
+## Opacity
 
 ```text
-10% – 35%
+8% – 25%
 ```
 
-Do not make decorative flowers the focal point.
+Occasionally:
+
+```text
+30% max
+```
+
+Floral decoration should be discovered, not shouted.
 
 ---
 
-# 7. Background System
+# 12. BRAND MARK
 
-Preferred backgrounds:
-
-### Main
+Logo direction:
 
 ```text
-#FFFFFF
+❀ MUTYA
 ```
 
-### Soft Sections
+or
 
 ```text
-#FFF9F5
+MUTYA
+small floral mark
 ```
 
-### Pink Sections
+Keep it simple.
 
-```text
-#F8C8DC
-```
-
-### Promotional Sections
-
-Use subtle pink gradients:
-
-```text
-linear-gradient(135deg, #FFF9F5, #F8C8DC)
-```
-
-Avoid strong gradients.
+Do not turn the flower into a complicated logo illustration.
 
 ---
 
-# 8. Spacing System
+# 13. NAVIGATION — PREMIUM FASHION STORE
 
-Use a consistent spacing scale.
-
-Recommended Tailwind-style values:
-
-```text
-4px
-8px
-12px
-16px
-24px
-32px
-48px
-64px
-80px
-96px
-```
-
-Desktop sections:
-
-```text
-padding-top: 80px
-padding-bottom: 80px
-```
-
-Mobile sections:
-
-```text
-padding-top: 48px
-padding-bottom: 48px
-```
-
-Use generous whitespace around:
-- Hero
-- Product grids
-- Testimonials
-- Promotional sections
-
----
-
-# 9. Border Radius
-
-Use soft but mature rounding.
+## Desktop
 
 Recommended:
 
 ```text
-sm: 8px
-md: 12px
-lg: 16px
-xl: 24px
-pill: 9999px
+          MUTYA
+
+SHOP   COLLECTIONS   ABOUT   JOURNAL        SEARCH  ♡  BAG
 ```
 
-Default:
-- Cards: 16px
-- Buttons: 12px
-- Image containers: 16px
-- Tags/badges: pill
+If the content width allows, account can appear inside a utility area.
 
-Avoid excessive rounding that makes the UI look childish.
+## Header behavior
+
+- transparent/overlay over hero where appropriate
+- transitions to white/cream when scrolling
+- thin bottom border
+- restrained shadow
+- sticky
+
+This creates a more editorial experience than a permanently boxed navbar.
+
+## Mobile
+
+Use:
+
+```text
+☰     MUTYA     ♡   BAG
+```
+
+or:
+
+```text
+☰     MUTYA     BAG
+```
+
+Search can expand into a full-width search panel.
+
+Mobile navigation must feel intentional, not like a desktop menu collapsed into a hamburger.
 
 ---
 
-# 10. Shadows
+# 14. HOMEPAGE — NEW STRUCTURE
 
-Use very subtle shadows.
+Homepage should feel like a fashion campaign.
 
-Default card shadow:
-
-```text
-0 8px 30px rgba(58, 48, 51, 0.06)
-```
-
-Hover:
+Recommended order:
 
 ```text
-0 12px 35px rgba(58, 48, 51, 0.10)
+1. Announcement bar
+2. Hero campaign
+3. Category / Shop by style
+4. Best sellers
+5. Editorial brand story
+6. New arrivals
+7. Product education / material spotlight
+8. Campaign / promotion
+9. Social proof / reviews
+10. Social gallery
+11. Newsletter
+12. Footer
 ```
 
-Do not use strong black shadows.
+The homepage must NOT be:
+
+```text
+Hero
+rounded card
+rounded card
+rounded card
+rounded card
+rounded card
+```
+
+Instead alternate visual rhythms.
 
 ---
 
-# 11. Buttons
+# 15. ANNOUNCEMENT BAR
 
-## Primary Button
-
-Style:
-
-- Background: deep pink
-- Text: white
-- Radius: 12px
-- Medium weight
-- Smooth hover
+Minimal.
 
 Example:
 
 ```text
-SHOP NOW
+Free shipping for selected orders ✦
 ```
 
-Hover:
-- Slightly darker pink
-- Small upward movement
-- Subtle shadow
+or:
 
-## Secondary Button
+```text
+New Collection — Discover Your Everyday Favorite
+```
 
-- Transparent / white
-- Deep pink border
-- Deep pink text
+Height:
+
+```text
+32–38px
+```
+
+Do not overcrowd.
+
+---
+
+# 16. HERO — EDITORIAL FIRST
+
+The hero should be the biggest visual upgrade.
+
+## Desktop
+
+Use a large image-led composition.
+
+Preferred structure:
+
+```text
+┌──────────────────────────────────────────────┐
+│                                              │
+│  small eyebrow                              │
+│  ELEGANCE IN EVERY WRAP                     │
+│                                              │
+│  Discover                                    │
+│  your everyday                               │
+│  signature.                    [MODEL IMAGE] │
+│                                              │
+│  short copy                     floral edge  │
+│  [SHOP COLLECTION]                           │
+│                                              │
+└──────────────────────────────────────────────┘
+```
+
+Do not place the entire hero inside a tiny rounded card.
+
+## Mobile
+
+Stack:
+
+```text
+eyebrow
+headline
+copy
+CTA
+hero image
+```
+
+Image should remain visually dominant.
+
+---
+
+# 17. SHOP BY STYLE / CATEGORY
+
+Instead of generic equal cards, use an editorial arrangement.
 
 Example:
 
 ```text
-EXPLORE COLLECTION
+        Shop by Style
+
+[ PASHMINA large ]
+[ VOAL ] [ SEGI EMPAT ]
+[ SATIN ] [ CERUTY ]
 ```
 
-## Text Button
+Use different card sizes where useful.
 
-For:
-- View all
-- Learn more
-- Continue shopping
+Category labels should remain simple.
 
-Use minimal styling with an arrow.
-
-Example:
-
-```text
-View Collection →
-```
+Use real category data.
 
 ---
 
-# 12. Navigation
+# 18. BEST SELLER SECTION
 
-## Desktop Header
-
-Layout:
+Section heading:
 
 ```text
-Logo | Home | Shop | Collections | About | Contact | Search | Wishlist | Cart | Account
+Most Loved
 ```
 
-Header style:
-- White or cream background
-- Sticky on scroll
-- Thin bottom border
-- Minimal shadow
-
-Active navigation:
-- Deep pink text
-- Optional small underline
-
-## Mobile Header
-
-Layout:
+Supporting line:
 
 ```text
-Hamburger | Logo | Search | Cart
+Pilihan yang paling sering dipilih untuk menemani hari-harimu.
 ```
 
-Keep the header compact.
+Use a horizontal scroll on mobile when appropriate.
+
+Desktop:
+3–4 products
+
+Mobile:
+1.2–2 products visible for a premium carousel feel
+
+Product card should show:
+
+- image
+- favorite
+- badge
+- title
+- material
+- rating
+- price
+- compare price
+
+Do not put every piece of metadata on the card.
 
 ---
 
-# 13. Hero Section
+# 19. PRODUCT CARD — NEW STANDARD
 
-Hero should immediately communicate:
-
-1. What the brand sells
-2. Brand feeling
-3. Main CTA
-
-Recommended structure:
-
-```text
-[Headline]
-Elegance in Every Wrap
-
-[Supporting text]
-Temukan hijab yang nyaman, elegan,
-dan cocok untuk setiap momen.
-
-[SHOP NOW]
-
-               [Model wearing hijab]
-         [subtle floral decoration]
-```
-
-Hero background:
-- Cream
-- Soft pink
-- White
-
-Use floral elements around the edges.
-
-Do not place decorative objects directly over the model/product.
-
----
-
-# 14. Category Cards
-
-Categories:
-
-- Pashmina
-- Segi Empat
-- Voal
-- Satin
-- Ceruty
-- Instant
-- Premium
-
-Card style:
-
-- Large product/fashion image
-- Rounded 16px
-- Category name below or overlay
-- Small floral accent
-
-Interaction:
-- Hover image zoom: 1.03
-- Smooth transition
-- CTA appears subtly
-
----
-
-# 15. Product Card
-
-Every product card should contain:
-
-- Product image
-- Product name
-- Price
-- Discount price if applicable
-- Rating
-- Review count
-- Wishlist icon
-- Badge when needed
-- Add to cart
-
-Example:
-
-```text
-[PRODUCT IMAGE]
-           ♡
-
-BEST SELLER
-
-Pashmina Silk Premium
-
-★★★★★ 4.9 (128)
-
-Rp89.000
-Rp109.000
-
-[Add to Cart]
-```
-
-Product image should have a clean background.
-
-Do not put too much text inside the image.
-
----
-
-# 16. Product Image Rules
-
-Use consistent image ratios.
-
-Recommended:
-
-```text
-4:5
-```
-
-for fashion/product photography.
-
-Images should:
-- Have good lighting
-- Show texture
-- Show true color
-- Be high resolution
-- Use consistent framing
-
-Product gallery:
-- Main image
-- Detail image
-- Lifestyle image
-- Color/texture image
-
----
-
-# 17. Product Detail Page
+Product cards should be visually cleaner.
 
 Structure:
 
 ```text
-Breadcrumb
+┌─────────────────────┐
+│                     │
+│    PRODUCT IMAGE    │
+│                 ♡   │
+│                     │
+│  BEST SELLER        │
+└─────────────────────┘
 
-[Image Gallery]     [Product Information]
+Product Name
+Voal Premium
+★★★★★
 
-                    Product Name
-                    Rating
-                    Price
-                    Discount
-                    Color selector
-                    Variant selector
-                    Quantity
-                    Add to Cart
-                    Buy Now
-
-                    Product Details
-                    Material
-                    Size
-                    Care Guide
-
-                    Reviews
-
-                    Related Products
+Rp99.000
+Rp129.000
 ```
 
-Make the purchase CTA visually dominant.
+### Interaction
 
-Sticky purchase CTA can be used on mobile.
+On desktop:
+- subtle image zoom
+- optional image swap on hover
+- wishlist animates
+- CTA appears subtly
+
+On mobile:
+- no hover dependency
+- actions visible/tappable
+
+Do not put giant Add to Cart buttons under every product card.
 
 ---
 
-# 18. Filter & Search UI
+# 20. NEW ARRIVALS
 
-Filters:
+Use a more energetic section.
 
-- Category
-- Color
-- Material
-- Price
-- Rating
-- Availability
+Heading:
 
-Filter UI should be:
-- Simple
-- Fast
-- Easy to reset
+```text
+Just In
+```
 
-Desktop:
-- Sidebar filter or top filter bar
+Add:
 
-Mobile:
-- Bottom sheet filter
+```text
+View All →
+```
 
-Search should support:
-- Product names
-- Categories
-- Materials
-- Colors
+Use actual latest products.
 
-Add autocomplete suggestions.
+Use small product labels:
+
+```text
+NEW
+```
+
+not oversized badges.
 
 ---
 
-# 19. Wishlist
+# 21. EDITORIAL BRAND STORY
 
-Wishlist icon:
+This is the major missing piece from the old design.
 
-```text
-♡
-```
-
-Filled:
+Use an editorial split:
 
 ```text
-♥
+[ Large editorial image ]
+
+                     About Mutya
+                     A quiet kind of
+                     everyday elegance.
+
+                     short brand story
+
+                     [Discover Our Story →]
 ```
 
-Interactions:
-- Smooth toggle animation
-- Show toast notification
+Background:
+- cream
+- white
+- very subtle botanical line-art
+
+Purpose:
+Make Mutya feel like a **brand**, not only a store.
+
+---
+
+# 22. MATERIAL / PRODUCT EDUCATION
+
+Inspired by the product-education approach visible on premium hijab stores.
+
+Possible blocks:
+
+```text
+Why Voal?
+Light. Cool. Easy to style.
+
+Why Ceruty?
+Flowy texture with an effortless drape.
+
+Why Silk?
+Soft sheen for elevated moments.
+```
+
+Do NOT invent claims that are not supported by actual product data.
+
+When possible, use product material data from the database.
+
+This section can link directly to filtered products.
+
+---
+
+# 23. PROMOTIONAL CAMPAIGN
+
+Use one strong campaign block instead of many banners.
 
 Example:
 
 ```text
-Added to wishlist
-```
+THE EVERYDAY EDIT
 
----
-
-# 20. Cart
-
-Cart should clearly show:
-
-- Product
-- Variant
-- Quantity
-- Price
-- Subtotal
-- Discount
-- Shipping
-- Total
-
-Primary CTA:
-
-```text
-CHECKOUT
-```
-
-Add recommendation below:
-
-```text
-Complete Your Look
-```
-
----
-
-# 21. Checkout
-
-Checkout must be visually calm and distraction-free.
-
-Recommended sections:
-
-1. Contact information
-2. Shipping address
-3. Shipping method
-4. Payment method
-5. Order summary
-
-Avoid unnecessary navigation during checkout.
-
-Use:
-- Clear labels
-- Large input fields
-- Visible validation
-- Clear price summary
-
----
-
-# 22. Review System
-
-Reviews should show:
-
-- Rating
-- Customer name
-- Date
-- Review text
-- Customer photo when available
-
-Prioritize photo reviews.
-
-Example badge:
-
-```text
-Verified Purchase
-```
-
-Photos should be displayed in a clean gallery.
-
----
-
-# 23. Promotional Components
-
-Use promotions sparingly.
-
-Examples:
-
-### New Collection
-
-```text
-New Collection
-Discover your next favorite hijab.
+20% OFF SELECTED STYLES
 
 [SHOP NOW]
 ```
 
-### Discount
+Visual:
+- large image
+- pink/cream text panel
+- subtle floral decoration
 
-```text
-20% OFF
-Limited Time Only
-```
-
-### Free Shipping
-
-```text
-FREE SHIPPING
-On selected orders
-```
-
-Use floral elements subtly inside banners.
+Avoid discount-site aesthetics.
 
 ---
 
-# 24. Why Choose Us
+# 24. REVIEWS / SOCIAL PROOF
 
-Use 4–5 compact benefit cards:
+Use actual reviews where possible.
+
+Layout:
 
 ```text
-Premium Quality
-Comfortable Materials
-Fast Shipping
-Secure Payment
-Easy Returns
+“quote”
+
+★★★★★
+
+Customer Name
+Verified Purchase
 ```
 
-Icons should be:
-- Minimal
-- Line-based
-- Rounded
-- Consistent
+If there are not enough reviews:
+- use a graceful empty state
+- do not fabricate customer claims
 
-Avoid colorful cartoon icons.
+Optional:
+- customer photo grid
+- review photo masonry
 
 ---
 
-# 25. Testimonials
+# 25. SOCIAL GALLERY
 
-Design:
+A clean visual grid.
 
-- Soft cream background
-- Large quotation mark
-- Customer photo
-- Review
-- Rating
-- Customer name
+Prefer:
 
-Optional floral line-art in a corner.
+```text
+2 columns mobile
+4 columns desktop
+```
+
+Mix:
+- product
+- lifestyle
+- packaging
+- detail
+
+Avoid oversized Instagram logo decoration.
 
 ---
 
-# 26. Footer
+# 26. NEWSLETTER / COMMUNITY
 
-Footer should contain:
+Instead of a basic input box, create a stronger brand statement.
 
-### Brand
-
-Short brand description.
-
-### Navigation
-
-- Shop
-- Collections
-- About
-- Contact
-- FAQ
-
-### Customer Service
-
-- Shipping
-- Returns
-- Order Tracking
-- Payment
-
-### Social
-
-- Instagram
-- TikTok
-- WhatsApp
-
-### Newsletter
+Example:
 
 ```text
-Get 10% OFF Your First Order
-[Email Address]
-[Subscribe]
+A little beauty, delivered.
+
+Join the Mutya list for new collections,
+special offers, and styling inspiration.
+
+[ Email Address              ][ Join ]
 ```
 
-Add subtle floral background line-art.
+Background:
+cream/pink
+
+Optional botanical edge.
 
 ---
 
-# 27. Admin Dashboard Visual Direction
+# 27. FOOTER
 
-The admin dashboard does NOT need the same decorative treatment as the customer storefront.
+Footer should feel editorial and premium.
 
-Use a more functional style:
+Columns:
 
-- White
-- Soft gray
-- Dusty pink
-- Dark charcoal
+```text
+MUTYA
+Quietly elegant hijabs for everyday moments.
 
-Dashboard priority:
+SHOP
+New Arrivals
+Best Sellers
+All Hijabs
+Categories
 
-1. Revenue
-2. Orders
-3. Customers
-4. Inventory
-5. Analytics
+HELP
+Shipping
+Returns
+Order Tracking
+FAQ
+Contact
 
-Charts should be simple and readable.
+FOLLOW
+Instagram
+TikTok
+WhatsApp
+```
 
-Use pink as the main highlight color.
+Add newsletter/social CTA.
 
 ---
 
-# 28. Responsive Design
+# 28. SHOP PAGE
 
-The website is mobile-first.
+The shop page should feel like a fashion catalog.
 
-## Mobile
-
-Width:
+Top:
 
 ```text
-320px – 767px
+Shop Hijab
+
+short editorial intro
 ```
 
-Priorities:
-- Fast navigation
-- Large touch targets
-- Sticky cart / CTA where appropriate
-- 2-column product grid
-- Compact header
-
-## Tablet
-
-Width:
+Then:
 
 ```text
-768px – 1023px
+Search
+Category
+Material
+Color
+Price
+Sort
 ```
-
-Use:
-- 2–3 product columns
-- Wider spacing
-- Expanded navigation where possible
 
 ## Desktop
 
-Width:
+Filter sidebar optional.
 
-```text
-1024px+
-```
-
-Use:
-- Max content width around 1200–1280px
-- 4 product columns where appropriate
-- Spacious hero section
-
----
-
-# 29. Responsive Rules
-
-Never allow:
-
-- Horizontal scrolling
-- Overlapping text
-- Cropped CTA
-- Tiny buttons
-- Decorative flowers covering content
-
-All layouts must gracefully collapse.
-
----
-
-# 30. Animation & Microinteractions
-
-Animations must feel elegant and subtle.
+## Mobile
 
 Use:
 
 ```text
-duration: 200ms – 400ms
-ease: ease-out
+[ Filter ] [ Sort ]
 ```
 
-Examples:
-- Product card hover
-- Image zoom
-- Button hover
-- Wishlist toggle
-- Toast notification
-- Modal appearance
-- Navigation transition
+as sticky/top controls.
 
-Avoid:
-- Excessive bouncing
-- Flashing
-- Large parallax effects
-- Slow page transitions
+Use a slide-over/bottom sheet instead of a permanently visible sidebar.
 
 ---
 
-# 31. Loading States
+# 29. PRODUCT DETAIL
 
-Use skeleton loaders instead of blank screens.
+Product detail should feel premium and educational.
 
-Skeleton style:
-- Soft cream/gray
-- Rounded
-- Low contrast
-
-Examples:
-- Product card skeleton
-- Product detail skeleton
-- Order list skeleton
-
----
-
-# 32. Empty States
-
-Empty states should feel friendly and branded.
-
-Example wishlist:
+## Desktop
 
 ```text
-Your wishlist is waiting for its favorites.
+IMAGE GALLERY      PRODUCT INFO
 
-[Explore Collection]
-
-     subtle floral illustration
+                    Product Name
+                    Material
+                    Rating
+                    Price
+                    Color
+                    Variant
+                    Quantity
+                    Add to Cart
+                    Buy Now
 ```
 
-Do not overdecorate.
+## Mobile
+
+```text
+image
+gallery dots
+name
+rating
+price
+color
+variant
+stock
+CTA
+description
+material
+reviews
+related products
+```
+
+CTA can become sticky at the bottom on mobile.
 
 ---
 
-# 33. Error States
+# 30. PRODUCT COLOR SELECTION
 
-Error messages must be clear.
+Use real color swatches.
 
-Bad:
+Swatch:
 
 ```text
-Error 500
+●
+```
+
+Selected state:
+- 1–2px dark outline
+- subtle ring
+- accessible text label
+
+Never rely only on color.
+
+Always include a text label such as:
+
+```text
+Dusty Pink
+```
+
+---
+
+# 31. CART
+
+Cart should be calm and editorial.
+
+Desktop:
+
+```text
+Your Bag
+
+Products                 Summary
+                         Subtotal
+                         Shipping
+                         Total
+
+                         [CHECKOUT]
+```
+
+Mobile:
+- product first
+- summary below
+- sticky CTA where appropriate
+
+Do not add decorative flowers between every item.
+
+---
+
+# 32. CHECKOUT
+
+Checkout should maximize trust.
+
+Use:
+
+```text
+Contact
+Shipping Address
+Shipping Method
+Payment
+Order Summary
+```
+
+Keep one clear primary CTA.
+
+No unnecessary navigation distractions.
+
+---
+
+# 33. ORDER DETAIL / TRACKING
+
+Order timeline should be a proper visual component.
+
+Desktop:
+horizontal timeline where space allows.
+
+Mobile:
+vertical timeline.
+
+Never allow labels to overlap or clip.
+
+Use concise labels:
+
+```text
+Dibuat
+Dikonfirmasi
+Diproses
+Dikemas
+Dikirim
+Tiba
+Selesai
+```
+
+Descriptions can appear below the active step only.
+
+---
+
+# 34. AUTHENTICATION
+
+Login/register pages should feel branded but not over-designed.
+
+Use:
+
+- cream canvas
+- centered form
+- simple floral line-art
+- serif heading
+- pink CTA
+- clear validation
+
+Example:
+
+```text
+Welcome back.
+
+Masuk untuk melanjutkan
+ke koleksi Mutya.
+
+[ Email ]
+[ Password ]
+
+[ MASUK ]
+
+Belum punya akun?
+Daftar →
+```
+
+---
+
+# 35. ADMIN UI
+
+Admin remains functional and separate from the fashion storefront.
+
+Style:
+
+```text
+white
+cream
+gray
+pink accent
+dense information
+clear tables
+```
+
+Do not add large editorial photography or decorative floral walls to the admin.
+
+---
+
+# 36. COMPONENT SYSTEM
+
+Reusable components should include:
+
+```text
+StorefrontLayout
+AnnouncementBar
+Navbar
+MobileNav
+SearchOverlay
+SectionHeading
+EditorialSplit
+HeroSection
+CategoryMosaic
+CategoryCard
+ProductCard
+ProductGrid
+ProductCarousel
+PriceDisplay
+RatingStars
+WishlistButton
+ColorSwatch
+Badge
+PromoCampaign
+MaterialSpotlight
+ReviewCard
+ReviewPhotoGrid
+Newsletter
+Footer
+Toast
+EmptyState
+FilterDrawer
+SortControl
+Pagination
+OrderTimeline
+```
+
+Prefer composition over one giant component.
+
+---
+
+# 37. COMPONENT RULE — AVOID UI FATIGUE
+
+Do not use the same visual box repeatedly.
+
+Example bad:
+
+```text
+Card
+Card
+Card
+Card
+Card
+Card
 ```
 
 Better:
 
 ```text
-Something went wrong.
-
-Please try again.
-[Try Again]
+Editorial image
+Product grid
+Whitespace
+Soft section
+Product carousel
+Editorial image
+Campaign banner
+Review strip
 ```
 
-Use floral decoration only as a subtle supporting element.
+Visual rhythm matters.
 
 ---
 
-# 34. Toast / Notification Style
+# 38. MOBILE-FIRST
 
-Toast:
+This is mandatory.
 
-- White/cream background
-- Soft border
-- Small shadow
-- Rounded 12px
-- Dark text
-- Pink icon/accent
-
-Examples:
+Build from:
 
 ```text
-✓ Added to cart
-♡ Added to wishlist
-✓ Order placed successfully
+320px+
 ```
 
+Then enhance for:
+
+```text
+640px
+768px
+1024px
+1280px
+1536px
+```
+
+## Mobile rules
+
+- no horizontal scroll
+- minimum 44px touch targets
+- buttons full-width when helpful
+- 2-column product grid where appropriate
+- 1-column editorial sections
+- sticky CTA only when useful
+- navigation simplified
+- filters become drawer/sheet
+- text must wrap naturally
+- floral decoration must not overlap content
+
 ---
 
-# 35. Accessibility
+# 39. RESPONSIVE PRODUCT GRID
 
-The UI must remain accessible.
+Recommended:
 
-Requirements:
+```text
+Mobile:
+2 columns
 
-- Good text contrast
-- Visible focus state
-- Keyboard navigation
-- Semantic HTML
-- Alt text on product images
-- Buttons must have clear labels
-- Form fields must have labels
-- Do not rely only on color to communicate status
+Tablet:
+2–3 columns
+
+Desktop:
+4 columns
+
+Wide:
+4–5 columns where content supports it
+```
+
+Do not make products too small.
 
 ---
 
-# 36. Image & Asset Guidelines
+# 40. RESPONSIVE HERO
 
-Preferred visuals:
+Desktop:
+- large visual composition
+- asymmetrical layout
 
-- Realistic fashion photography
-- Soft studio lighting
-- Neutral backgrounds
-- Consistent product photography
-- Elegant female styling
-- Natural skin tone
-- Premium editorial feel
+Mobile:
+- stacked
+- image remains large
+- text remains readable
+
+Never preserve desktop side-by-side layout on narrow screens.
+
+---
+
+# 41. INTERACTIONS
+
+Preferred:
+
+- 200–350ms
+- ease-out
+- subtle transform
+- image scale 1.02–1.04
+- soft opacity transitions
 
 Avoid:
-- Low-resolution product images
-- Heavy filters
-- Oversaturated colors
-- Inconsistent photography style
-- Generic stock-photo appearance
+
+- bouncing
+- spinning
+- flashing
+- excessive parallax
+- large motion
 
 ---
 
-# 37. Component Naming Convention
+# 42. ACCESSIBILITY
 
-Use reusable components.
+Required:
 
-Suggested components:
+- semantic HTML
+- alt text
+- keyboard focus
+- visible focus states
+- sufficient color contrast
+- labels for inputs
+- aria labels for icon-only buttons
+- do not rely on hover for essential information
+- do not rely on color alone
+
+---
+
+# 43. PERFORMANCE
+
+Prefer:
+
+- Blade + Tailwind
+- minimal JavaScript
+- native CSS transitions
+- lazy-loaded images
+- responsive image sizing
+- reusable components
+
+Avoid unnecessary frontend frameworks.
+
+Do not add a dependency just to animate a simple element.
+
+---
+
+# 44. SEO / SHARING
+
+Storefront pages should support:
+
+- meaningful `<title>`
+- meta description
+- Open Graph
+- product image alt text
+- canonical URLs where appropriate
+
+Product URL:
 
 ```text
-Navbar
-MobileNavbar
-HeroSection
-CategoryCard
-ProductCard
-ProductGrid
-FilterSidebar
-SearchBar
-WishlistButton
-CartDrawer
-PromoBanner
-ReviewCard
-TestimonialCard
-NewsletterSection
-Footer
-Modal
-Toast
-Breadcrumb
-Pagination
+/product/{product:slug}
 ```
 
-Do not duplicate component styles unnecessarily.
-
----
-
-# 38. Tailwind CSS Direction
-
-Use Tailwind CSS with reusable design tokens.
-
-Example theme concept:
-
-```js
-colors: {
-  pink: {
-    soft: '#F8C8DC',
-    DEFAULT: '#EFA7C1',
-    deep: '#D98FAF',
-    mauve: '#B97897',
-  },
-  cream: '#FFF9F5',
-  gold: '#C9A227',
-  ink: '#3A3033',
-  muted: '#75686D',
-  border: '#EBDDE2',
-}
-```
-
-Do not scatter random hex values throughout components.
-
-Use the design tokens instead.
-
----
-
-# 39. UI Consistency Rules
-
-Every component must follow the same:
-
-- Border radius
-- Typography scale
-- Spacing
-- Button behavior
-- Color system
-- Shadow system
-- Icon style
-
-Do not create one-off visual styles unless there is a clear product reason.
-
----
-
-# 40. Do / Don't
-
-## DO
-
-- Use soft pink + cream
-- Use elegant serif headings
-- Use clean sans-serif body text
-- Use premium product photography
-- Use subtle floral line-art
-- Use generous whitespace
-- Use rounded cards
-- Keep CTA obvious
-- Make product information easy to scan
-- Keep mobile UX excellent
-
-## DON'T
-
-- Don't make everything pink
-- Don't use childish flowers
-- Don't use too many gradients
-- Don't overuse gold
-- Don't add unnecessary animations
-- Don't make cards too crowded
-- Don't use low-contrast text
-- Don't make the website look like a generic marketplace
-- Don't allow floral elements to compete with products
-
----
-
-# 41. Page-by-Page Visual Direction
-
-## Home
-
-Mood:
-**Editorial + soft luxury**
-
-Focus:
-- Hero
-- New collection
-- Best seller
-- Category
-- Testimonials
-- Instagram
-
-## Shop
-
-Mood:
-**Clean + product-focused**
-
-Focus:
-- Search
-- Filter
-- Product grid
-
-## Product Detail
-
-Mood:
-**Premium + informative**
-
-Focus:
-- Product photography
-- Material
-- Variant
-- Reviews
-- Purchase CTA
-
-## Cart
-
-Mood:
-**Simple + functional**
-
-Focus:
-- Order summary
-- Checkout CTA
-
-## Checkout
-
-Mood:
-**Calm + trustworthy**
-
-Focus:
-- Forms
-- Payment
-- Order summary
-
-## About
-
-Mood:
-**Warm + storytelling**
-
-Focus:
-- Brand story
-- Founder
-- Values
-- Craftsmanship
-
-## Admin
-
-Mood:
-**Functional + professional**
-
-Focus:
-- Data
-- Orders
-- Products
-- Revenue
-- Inventory
-
----
-
-# 42. Brand Voice
-
-Copy should sound:
-
-- Warm
-- Elegant
-- Friendly
-- Confident
-- Modern
-
-Avoid overly formal corporate language.
-
-Preferred examples:
+Category URL:
 
 ```text
-Find your perfect wrap.
-Elegance in every detail.
+/shop/{category:slug}
+```
+
+---
+
+# 45. BRAND VOICE
+
+Tone:
+
+```text
+Warm
+Elegant
+Confident
+Modern
+Human
+```
+
+Prefer:
+
+```text
+Find your everyday favorite.
+Elegance in every wrap.
 Made for your everyday moments.
-Your next favorite hijab is waiting.
+Discover your next signature shade.
 ```
 
 Avoid:
@@ -1332,58 +1500,185 @@ Avoid:
 ```text
 BUY NOW!!!
 SUPER CHEAP!!!
-BEST PRICE!!!
+BEST DEAL!!!
+```
+
+Use Indonesian for most commerce UI.
+
+English may be used selectively for editorial campaign lines.
+
+---
+
+# 46. DO / DON'T
+
+## DO
+
+- Keep pink identity
+- Use cream/white as the canvas
+- Use editorial photography
+- Use subtle floral marks
+- Use asymmetric layouts
+- Use strong visual merchandising
+- Highlight product imagery
+- Use clean product cards
+- Use real product data
+- Make mobile experience excellent
+- Alternate between grids and editorial layouts
+
+## DON'T
+
+- Don't make every section a rounded card
+- Don't make everything pink
+- Don't put flowers everywhere
+- Don't use giant shadows
+- Don't make every CTA a huge pill
+- Don't overcrowd product cards
+- Don't make the homepage look like a CRUD app
+- Don't use fake reviews
+- Don't hardcode product data
+- Don't copy reference websites directly
+- Don't depend on hover for mobile interactions
+
+---
+
+# 47. PAGE-BY-PAGE MOOD
+
+## Homepage
+
+```text
+Editorial
+Warm
+Aspirational
+Fashion-led
+```
+
+## Shop
+
+```text
+Clean
+Curated
+Product-first
+Easy to filter
+```
+
+## Product detail
+
+```text
+Premium
+Educational
+Trustworthy
+Conversion-focused
+```
+
+## Cart
+
+```text
+Minimal
+Calm
+Clear
+```
+
+## Checkout
+
+```text
+Trustworthy
+Focused
+Low distraction
+```
+
+## Order tracking
+
+```text
+Clear
+Reassuring
+Structured
+```
+
+## Auth
+
+```text
+Warm
+Simple
+Branded
+```
+
+## Admin
+
+```text
+Functional
+Professional
+Efficient
 ```
 
 ---
 
-# 43. Vibe Coding Instructions for AI
+# 48. VIBE CODING RULES
 
-When implementing this design, the AI coding agent must follow these rules:
+When an AI coding agent works on the project:
 
-1. Read this `DESIGN.md` before creating or modifying UI.
-2. Treat this document as the visual source of truth.
-3. Do not invent a different color palette.
-4. Do not introduce unrelated UI styles.
-5. Reuse existing components before creating new ones.
-6. Keep the UI responsive from the beginning.
-7. Use Tailwind design tokens rather than repeated raw colors.
-8. Keep floral decorations subtle.
-9. Prioritize product clarity and conversion.
-10. Test mobile and desktop layouts after every major UI change.
-11. Maintain visual consistency across all pages.
-12. Prefer reusable components over duplicated markup.
-13. Avoid unnecessary dependencies for simple visual effects.
-14. Use accessible semantic HTML.
-15. Keep animations subtle and performance-friendly.
+1. Read DESIGN.md first.
+2. Preserve the existing brand palette.
+3. Do not invent a new design language.
+4. Prefer editorial layouts over repetitive card stacks.
+5. Reuse components.
+6. Use real Laravel data.
+7. Preserve backend behavior.
+8. Build mobile-first.
+9. Test narrow viewport layouts.
+10. Fix horizontal overflow.
+11. Keep floral details subtle.
+12. Do not copy reference websites.
+13. When a section feels visually flat, improve hierarchy through image scale, typography, spacing, and composition before adding more decoration.
+14. Prefer one strong visual idea per section.
+15. Do not add unnecessary JavaScript dependencies.
 
 ---
 
-# 44. Definition of Done — UI
+# 49. ACCEPTANCE CRITERIA — STOREFRONT
 
-A page is considered visually complete when:
+A page is visually complete when:
 
-- It follows the color system.
-- It follows the typography system.
-- It uses consistent spacing.
-- It uses the correct border radius.
-- It uses the correct button styles.
-- Product images maintain consistent proportions.
-- Floral elements are subtle.
-- Mobile layout works correctly.
-- Tablet layout works correctly.
-- Desktop layout works correctly.
+- It follows this design system.
+- Brand colors are consistent.
+- Typography is consistent.
+- Product photography is dominant.
+- Floral decoration is subtle.
+- Layout does not rely on repetitive cards.
+- Responsive behavior is intentionally designed.
 - No horizontal overflow exists.
-- Interactive states are implemented.
-- Loading and empty states are handled.
-- Accessibility basics are respected.
+- Mobile controls are touch-friendly.
+- Product data comes from Laravel.
+- No fake business data is hardcoded.
+- Loading / empty / error states exist where needed.
+- Focus states are accessible.
+- Page hierarchy is immediately understandable.
 
 ---
 
-# 45. Final Design Goal
+# 50. FINAL DESIGN GOAL
 
-The finished website should make a customer feel:
+The final Mutya website should create this reaction:
 
-> **"This brand is feminine, elegant, trustworthy, and premium — and I can easily find a hijab I like."**
+> **"Ini terasa seperti brand hijab premium yang benar-benar punya identitas."**
 
-The website should feel like a **real fashion brand**, not a generic CRUD e-commerce template.
+The customer should be able to:
+
+```text
+Discover
+   ↓
+Feel inspired
+   ↓
+Understand the product
+   ↓
+Find a preferred color/material
+   ↓
+Add to bag
+   ↓
+Checkout
+   ↓
+Track the order
+```
+
+The interface must be **fashion editorial first, e-commerce second, floral third**.
+
+That balance is what makes Mutya feel premium instead of decorative.
