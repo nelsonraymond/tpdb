@@ -59,6 +59,7 @@ class OrderController extends Controller
 
         $this->orderService->cancelOrder($order, 'Dibatalkan oleh pelanggan', Auth::user());
 
-        return back()->with('success', 'Pesanan berhasil dibatalkan dan stok produk telah dikembalikan.');
+        return redirect()->route('orders.show', $order)
+            ->with('success', 'Pesanan berhasil dibatalkan dan stok produk telah dikembalikan.');
     }
 }
