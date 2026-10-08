@@ -42,12 +42,21 @@
     </header>
 
     <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
-        <!-- Success Alert if just placed -->
+        <!-- Flash Alerts -->
         @if(session('success'))
             <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                     <span class="text-emerald-500 font-bold">✓</span>
                     <span>{{ session('success') }}</span>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-rose-500 font-bold">✕</span>
+                    <span>{{ session('error') }}</span>
                 </div>
             </div>
         @endif
@@ -92,23 +101,23 @@
                     <!-- Stepper Timeline -->
                     <div class="relative">
                         <!-- Horizontal Track (desktop) -->
-                        <div class="hidden md:grid grid-cols-7 gap-2 relative">
-                            <!-- Background connecting bar -->
-                            <div class="absolute top-4 left-6 right-6 h-0.5 bg-[#EBDDE2] -z-0"></div>
+                        <div class="hidden md:flex justify-between gap-1 relative overflow-hidden py-1">
+                            <!-- Background connecting bar (sits between first & last dot centers) -->
+                            <div class="absolute top-4 left-[calc(100%/14)] right-[calc(100%/14)] h-0.5 bg-[#EBDDE2] -z-0"></div>
 
                             @foreach($order->trackingTimeline() as $step)
-                                <div class="flex flex-col items-center text-center relative z-10">
-                                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition {{ $step['is_completed'] ? 'bg-[#D98FAF] text-white shadow-xs' : 'bg-white border-2 border-[#EBDDE2] text-[#75686D]' }} {{ $step['is_current'] ? 'ring-4 ring-[#D98FAF]/25 scale-105' : '' }}">
+                                <div class="flex flex-col items-center text-center relative z-10 flex-1 min-w-0 px-1">
+                                    <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold transition {{ $step['is_completed'] ? 'bg-[#D98FAF] text-white shadow-xs' : 'bg-white border-2 border-[#EBDDE2] text-[#75686D]' }} {{ $step['is_current'] ? 'ring-4 ring-[#D98FAF]/25' : '' }}">
                                         @if($step['is_completed'] && ! $step['is_current'])
                                             ✓
                                         @else
                                             {{ $loop->iteration }}
                                         @endif
                                     </div>
-                                    <span class="text-xs font-semibold mt-2 {{ $step['is_completed'] ? 'text-[#3A3033]' : 'text-[#75686D]' }}">
+                                    <span class="text-xs font-semibold mt-2 leading-snug w-full break-words {{ $step['is_completed'] ? 'text-[#3A3033]' : 'text-[#75686D]' }}">
                                         {{ $step['title'] }}
                                     </span>
-                                    <span class="text-[10px] text-[#75686D] mt-0.5 max-w-[100px] leading-tight">
+                                    <span class="text-[10px] text-[#75686D] mt-0.5 leading-tight w-full break-words">
                                         {{ $step['description'] }}
                                     </span>
                                 </div>
@@ -119,18 +128,18 @@
                         <div class="md:hidden space-y-4 relative pl-6 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#EBDDE2]">
                             @foreach($order->trackingTimeline() as $step)
                                 <div class="relative flex items-start space-x-3">
-                                    <div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold {{ $step['is_completed'] ? 'bg-[#D98FAF] text-white' : 'bg-white border border-[#EBDDE2] text-[#75686D]' }} {{ $step['is_current'] ? 'ring-2 ring-[#D98FAF]/30' : '' }}">
+                                    <div class="absolute -left-6 top-0.5 w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold {{ $step['is_completed'] ? 'bg-[#D98FAF] text-white' : 'bg-white border border-[#EBDDE2] text-[#75686D]' }} {{ $step['is_current'] ? 'ring-2 ring-[#D98FAF]/30' : '' }}">
                                         @if($step['is_completed'] && ! $step['is_current'])
                                             ✓
                                         @else
                                             {{ $loop->iteration }}
                                         @endif
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-semibold {{ $step['is_completed'] ? 'text-[#3A3033]' : 'text-[#75686D]' }}">
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-semibold leading-snug break-words {{ $step['is_completed'] ? 'text-[#3A3033]' : 'text-[#75686D]' }}">
                                             {{ $step['title'] }}
                                         </p>
-                                        <p class="text-[11px] text-[#75686D]">{{ $step['description'] }}</p>
+                                        <p class="text-[11px] text-[#75686D] leading-snug break-words">{{ $step['description'] }}</p>
                                     </div>
                                 </div>
                             @endforeach
@@ -275,6 +284,29 @@
                         </span>
                     </div>
                 </div>
+
+                @if($order->isCancellable())
+                    <!-- Customer Cancellation Card -->
+                    <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs">
+                        <h2 class="font-serif-display text-base font-bold text-[#3A3033] pb-3 border-b border-[#EBDDE2] mb-4">
+                            Perlu Membatalkan?
+                        </h2>
+
+                        <p class="text-xs text-[#75686D] leading-relaxed mb-4">
+                            Pembatalan hanya tersedia sebelum pesanan dikirim. Stok produk akan otomatis dikembalikan setelah pesanan dibatalkan.
+                        </p>
+
+                        <form action="{{ route('orders.cancel', $order) }}" method="POST"
+                            onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?');">
+                            @csrf
+                            <button type="submit"
+                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-sm font-semibold hover:bg-rose-100 hover:border-rose-300 active:bg-rose-200 transition min-h-[44px]">
+                                <span aria-hidden="true">✕</span>
+                                Batalkan Pesanan
+                            </button>
+                        </form>
+                    </div>
+                @endif
 
                 <div class="text-center pt-2">
                     <a href="{{ route('shop.index') }}"

@@ -152,6 +152,15 @@ class Order extends Model
     }
 
     /**
+     * Whether the customer may still cancel this order themselves.
+     * Mirrors the cancellable states enforced by OrderService::cancelOrder().
+     */
+    public function isCancellable(): bool
+    {
+        return in_array($this->status, ['pending', 'confirmed', 'processing', 'packed'], true);
+    }
+
+    /**
      * Get tracking timeline steps for visual rendering.
      *
      * @return array<int, array{key: string, title: string, description: string, is_completed: bool, is_current: bool}>
