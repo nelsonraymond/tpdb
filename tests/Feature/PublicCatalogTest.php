@@ -55,11 +55,13 @@ class PublicCatalogTest extends TestCase
         Product::factory()->create([
             'category_id' => $category->id,
             'name' => 'Hijab Segi Empat Voal',
+            'material' => 'Voal Premium',
             'is_active' => true,
         ]);
         Product::factory()->create([
             'category_id' => $category->id,
             'name' => 'Pashmina Ceruty',
+            'material' => 'Ceruty Premium',
             'is_active' => true,
         ]);
 
