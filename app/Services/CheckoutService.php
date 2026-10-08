@@ -1,0 +1,241 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Address;
+use App\Models\Cart;
+use App\Models\CartItem;
+use App\Models\Order;
+use App\Models\ProductVariant;
+use App\Models\Shipment;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+
+class CheckoutService
+{
+    public function __construct(
+        protected CartService $cartService,
+        protected InventoryService $inventoryService,
+        protected ShippingService $shippingService,
+    ) {}
+
+    /**
+     * Prepare cart items and recalculate server-side totals.
+     *
+     * @return array{
+     *     cart: Cart,
+     *     items: Collection<int, CartItem>,
+     *     subtotal: float,
+     *     itemCount: int
+     * }
+     */
+    public function getValidatedCartData(User $user): array
+    {
+        $cart = $this->cartService->getOrCreateCart($user, session()->getId());
+        $cart->load(['items.variant.product.images']);
+
+        if ($cart->items->isEmpty()) {
+            throw ValidationException::withMessages([
+                'cart' => 'Keranjang belanja Anda masih kosong.',
+            ]);
+        }
+
+        $subtotal = 0.0;
+        $itemCount = 0;
+
+        foreach ($cart->items as $item) {
+            $variant = $item->variant;
+            $product = $variant?->product;
+
+            if (! $variant || ! $variant->is_active || ! $product || ! $product->is_active) {
+                throw ValidationException::withMessages([
+                    'cart' => 'Produk pada keranjang tidak lagi tersedia atau sedang tidak aktif.',
+                ]);
+            }
+
+            if ($variant->stock_qty <= 0) {
+                throw ValidationException::withMessages([
+                    'cart' => "Stok untuk produk {$product->name} ({$variant->name}) sedang habis.",
+                ]);
+            }
+
+            if ($item->quantity > $variant->stock_qty) {
+                throw ValidationException::withMessages([
+                    'cart' => "Kuantitas untuk {$product->name} ({$variant->name}) melebihi stok yang tersedia (tersedia: {$variant->stock_qty}).",
+                ]);
+            }
+
+            $currentPrice = $variant->finalPrice();
+            $subtotal += ($currentPrice * $item->quantity);
+            $itemCount += $item->quantity;
+        }
+
+        return [
+            'cart' => $cart,
+            'items' => $cart->items,
+            'subtotal' => $subtotal,
+            'itemCount' => $itemCount,
+        ];
+    }
+
+    /**
+     * Create an order from current customer's cart.
+     *
+     * @param array{
+     *     address_id: int,
+     *     shipping_method: string,
+     *     customer_note?: ?string
+     * } $data
+     */
+    public function placeOrder(User $user, array $data): Order
+    {
+        // 1. Verify that address belongs to user
+        /** @var Address $address */
+        $address = $user->addresses()->where('id', $data['address_id'])->first();
+        if (! $address) {
+            throw ValidationException::withMessages([
+                'address_id' => 'Alamat pengiriman tidak valid atau bukan milik Anda.',
+            ]);
+        }
+
+        // 2. Validate shipping method & cost server-side
+        $shippingOption = $this->shippingService->getMethod($data['shipping_method']);
+        $shippingCost = $shippingOption['cost'];
+
+        return DB::transaction(function () use ($user, $address, $shippingOption, $shippingCost, $data) {
+            // Re-fetch cart for authenticated user
+            $cart = Cart::where('user_id', $user->id)->with('items')->first();
+
+            if (! $cart || $cart->items->isEmpty()) {
+                throw ValidationException::withMessages([
+                    'cart' => 'Keranjang belanja Anda kosong.',
+                ]);
+            }
+
+            $variantIds = $cart->items->pluck('product_variant_id')->unique()->all();
+
+            // Lock inventory rows to prevent race condition overselling during concurrent checkout
+            $lockedVariants = ProductVariant::whereIn('id', $variantIds)
+                ->with('product')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            $orderSubtotal = 0.0;
+            $orderItemsData = [];
+
+            foreach ($cart->items as $cartItem) {
+                /** @var ?ProductVariant $lockedVariant */
+                $lockedVariant = $lockedVariants->get($cartItem->product_variant_id);
+
+                if (! $lockedVariant || ! $lockedVariant->is_active || ! $lockedVariant->product?->is_active) {
+                    throw ValidationException::withMessages([
+                        'cart' => 'Salah satu produk yang dipilih sudah tidak tersedia.',
+                    ]);
+                }
+
+                if ($cartItem->quantity > $lockedVariant->stock_qty) {
+                    throw ValidationException::withMessages([
+                        'cart' => "Stok tidak mencukupi untuk {$lockedVariant->product->name} ({$lockedVariant->name}). Sisa stok: {$lockedVariant->stock_qty}.",
+                    ]);
+                }
+
+                $unitPrice = $lockedVariant->finalPrice();
+                $itemSubtotal = $unitPrice * $cartItem->quantity;
+                $orderSubtotal += $itemSubtotal;
+
+                $orderItemsData[] = [
+                    'variant' => $lockedVariant,
+                    'quantity' => $cartItem->quantity,
+                    'unit_price' => $unitPrice,
+                    'subtotal' => $itemSubtotal,
+                ];
+            }
+
+            $grandTotal = $orderSubtotal + $shippingCost;
+
+            // Generate unique order number
+            $orderNumber = $this->generateUniqueOrderNumber();
+
+            // Create Order
+            $order = Order::create([
+                'order_number' => $orderNumber,
+                'user_id' => $user->id,
+                'status' => 'pending',
+                'payment_status' => 'pending',
+                'subtotal' => $orderSubtotal,
+                'discount_amount' => 0,
+                'shipping_cost' => $shippingCost,
+                'grand_total' => $grandTotal,
+                'voucher_code' => null,
+                'voucher_discount' => 0,
+                'shipping_recipient_name' => $address->recipient_name,
+                'shipping_phone' => $address->phone,
+                'shipping_address' => $address->fullAddress(),
+                'shipping_city' => $address->city,
+                'shipping_province' => $address->province,
+                'shipping_postal_code' => $address->postal_code,
+                'customer_note' => $data['customer_note'] ?? null,
+                'placed_at' => now(),
+            ]);
+
+            // Create immutable OrderItems snapshots and deduct stock atomically
+            foreach ($orderItemsData as $itemData) {
+                /** @var ProductVariant $variant */
+                $variant = $itemData['variant'];
+
+                $order->items()->create([
+                    'product_id' => $variant->product_id,
+                    'product_variant_id' => $variant->id,
+                    'product_name' => $variant->product->name,
+                    'variant_name' => $variant->name,
+                    'sku' => $variant->sku,
+                    'unit_price' => $itemData['unit_price'],
+                    'quantity' => $itemData['quantity'],
+                    'subtotal' => $itemData['subtotal'],
+                ]);
+
+                // Inventory deduction with InventoryMovement
+                $this->inventoryService->recordMovement(
+                    variant: $variant,
+                    quantity: $itemData['quantity'],
+                    type: 'out',
+                    userId: $user->id,
+                    note: "Pesanan #{$order->order_number}",
+                    referenceType: Order::class,
+                    referenceId: $order->id,
+                );
+            }
+
+            // Create Shipment record
+            Shipment::create([
+                'order_id' => $order->id,
+                'courier' => $shippingOption['courier'],
+                'service' => $shippingOption['service'],
+                'tracking_number' => null,
+                'shipping_cost' => $shippingCost,
+                'status' => 'pending',
+            ]);
+
+            // Clear the user's cart
+            $this->cartService->clearCart($cart);
+
+            return $order;
+        });
+    }
+
+    /**
+     * Generate unique order number with prefix and timestamp.
+     */
+    protected function generateUniqueOrderNumber(): string
+    {
+        do {
+            $number = 'ORD-'.date('Ymd').'-'.strtoupper(Str::random(6));
+        } while (Order::where('order_number', $number)->exists());
+
+        return $number;
+    }
+}

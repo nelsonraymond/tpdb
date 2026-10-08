@@ -1,0 +1,111 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
+
+class AdminAuthTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_admin_can_view_admin_login_page(): void
+    {
+        $response = $this->get(route('admin.login'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Portal Administrator');
+    }
+
+    public function test_admin_login_succeeds_and_redirects_to_admin_dashboard(): void
+    {
+        $admin = User::factory()->admin()->create([
+            'email' => 'admin@mutyastore.com',
+            'password' => Hash::make('admin1234'),
+        ]);
+
+        $response = $this->post(route('admin.login.submit'), [
+            'email' => 'admin@mutyastore.com',
+            'password' => 'admin1234',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticatedAs($admin);
+    }
+
+    public function test_customer_credentials_cannot_login_as_admin(): void
+    {
+        $customer = User::factory()->customer()->create([
+            'email' => 'customer@mutyastore.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $response = $this->post(route('admin.login.submit'), [
+            'email' => 'customer@mutyastore.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertSessionHasErrors(['email']);
+        $this->assertGuest();
+    }
+
+    public function test_invalid_admin_login_is_rejected(): void
+    {
+        User::factory()->admin()->create([
+            'email' => 'admin@mutyastore.com',
+            'password' => Hash::make('admin1234'),
+        ]);
+
+        $response = $this->post(route('admin.login.submit'), [
+            'email' => 'admin@mutyastore.com',
+            'password' => 'wrong_password',
+        ]);
+
+        $response->assertSessionHasErrors(['email']);
+        $this->assertGuest();
+    }
+
+    public function test_admin_can_access_admin_dashboard(): void
+    {
+        $admin = User::factory()->admin()->create([
+            'name' => 'Owner Mutya',
+            'email' => 'owner@mutyastore.com',
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Admin Dashboard');
+        $response->assertSee('Owner Mutya');
+        $response->assertSee('owner@mutyastore.com');
+        $response->assertSee('admin');
+    }
+
+    public function test_customer_cannot_access_admin_dashboard(): void
+    {
+        $customer = User::factory()->customer()->create();
+
+        $response = $this->actingAs($customer)->get(route('admin.dashboard'));
+
+        $response->assertStatus(403);
+    }
+
+    public function test_guest_cannot_access_admin_dashboard_and_is_redirected_to_admin_login(): void
+    {
+        $response = $this->get(route('admin.dashboard'));
+
+        $response->assertRedirect(route('admin.login'));
+    }
+
+    public function test_admin_logout_succeeds(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->post(route('admin.logout'));
+
+        $response->assertRedirect(route('admin.login'));
+        $this->assertGuest();
+    }
+}

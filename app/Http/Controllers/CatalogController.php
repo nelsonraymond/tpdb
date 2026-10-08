@@ -1,0 +1,110 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Category;
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class CatalogController extends Controller
+{
+    /**
+     * Display a listing of public catalog products.
+     */
+    public function index(Request $request, ?Category $category = null): View
+    {
+        // If visiting a specific category slug, verify that the category is active
+        if ($category && ! $category->is_active) {
+            abort(404);
+        }
+
+        $query = Product::query()
+            ->active()
+            ->whereHas('category', function ($q) {
+                $q->active();
+            })
+            ->with([
+                'category',
+                'images' => function ($q) {
+                    $q->orderByDesc('is_primary')->orderBy('sort_order');
+                },
+                'variants' => function ($q) {
+                    $q->active();
+                },
+            ]);
+
+        // Filter by category
+        if ($category) {
+            $query->where('category_id', $category->id);
+        } elseif ($request->filled('category')) {
+            $categorySlug = $request->input('category');
+            $query->whereHas('category', function ($q) use ($categorySlug) {
+                $q->where('slug', $categorySlug);
+            });
+        }
+
+        // Search by keyword
+        if ($request->filled('q')) {
+            $search = $request->input('q');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('material', 'like', "%{$search}%");
+            });
+        }
+
+        // Sorting
+        $sort = $request->input('sort', 'newest');
+        match ($sort) {
+            'price_asc' => $query->orderBy('base_price', 'asc'),
+            'price_desc' => $query->orderBy('base_price', 'desc'),
+            'best_seller' => $query->orderByDesc('is_best_seller')->latest(),
+            default => $query->latest(),
+        };
+
+        $products = $query->paginate(12)->withQueryString();
+
+        $categories = Category::query()
+            ->active()
+            ->withCount(['products' => function ($q) {
+                $q->active();
+            }])
+            ->orderBy('name')
+            ->get();
+
+        $selectedCategory = $category;
+
+        return view('catalog.index', compact('products', 'categories', 'selectedCategory', 'sort'));
+    }
+
+    /**
+     * Display public product detail.
+     */
+    public function show(Product $product): View
+    {
+        // Ensure product and its category are both active
+        if (! $product->is_active || ! $product->category?->is_active) {
+            abort(404);
+        }
+
+        $product->load([
+            'category',
+            'variants' => function ($q) {
+                $q->active();
+            },
+            'images' => function ($q) {
+                $q->orderByDesc('is_primary')->orderBy('sort_order');
+            },
+            'reviews' => function ($q) {
+                $q->where('is_published', true)->with('user')->latest();
+            },
+        ]);
+
+        $averageRating = (float) ($product->reviews->avg('rating') ?? 0);
+        $reviewCount = $product->reviews->count();
+        $totalStock = (int) $product->variants->sum('stock_qty');
+
+        return view('catalog.show', compact('product', 'averageRating', 'reviewCount', 'totalStock'));
+    }
+}

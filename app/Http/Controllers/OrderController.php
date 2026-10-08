@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use App\Services\OrderService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
+
+class OrderController extends Controller
+{
+    public function __construct(
+        protected OrderService $orderService,
+    ) {}
+
+    /**
+     * Display customer order history.
+     */
+    public function index(Request $request): View
+    {
+        $orders = $request->user()->orders()
+            ->with(['items.variant.product.images', 'shipment', 'payments'])
+            ->latest('placed_at')
+            ->latest('id')
+            ->paginate(10);
+
+        return view('orders.index', compact('orders'));
+    }
+
+    /**
+     * Display single order details with tracking timeline.
+     */
+    public function show(Order $order): View
+    {
+        // Enforce authorization: customer can only view their own order
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki hak akses untuk melihat pesanan ini.');
+        }
+
+        $order->load(['items.variant.product.images', 'shipment', 'payments', 'user']);
+
+        return view('orders.show', compact('order'));
+    }
+
+    /**
+     * Cancel customer's own order if still pending.
+     */
+    public function cancel(Order $order, Request $request): RedirectResponse
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki hak akses untuk membatalkan pesanan ini.');
+        }
+
+        if ($order->status !== 'pending') {
+            return back()->with('error', "Pesanan dengan status '{$order->statusLabel()}' tidak dapat dibatalkan secara mandiri.");
+        }
+
+        $this->orderService->cancelOrder($order, 'Dibatalkan oleh pelanggan', Auth::user());
+
+        return back()->with('success', 'Pesanan berhasil dibatalkan dan stok produk telah dikembalikan.');
+    }
+}
