@@ -53,11 +53,11 @@ class OrderController extends Controller
             abort(403, 'Anda tidak memiliki hak akses untuk membatalkan pesanan ini.');
         }
 
-        if ($order->status !== 'pending') {
-            return back()->with('error', "Pesanan dengan status '{$order->statusLabel()}' tidak dapat dibatalkan secara mandiri.");
+        try {
+            $this->orderService->cancelOrder($order, 'Dibatalkan oleh pelanggan', Auth::user());
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        $this->orderService->cancelOrder($order, 'Dibatalkan oleh pelanggan', Auth::user());
 
         return redirect()->route('orders.show', $order)
             ->with('success', 'Pesanan berhasil dibatalkan dan stok produk telah dikembalikan.');
