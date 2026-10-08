@@ -4,6 +4,50 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Mutya design tokens — single source of truth: DESIGN.md §3 & §38 */
+    --color-pink-soft: #F8C8DC;
+    --color-pink: #EFA7C1;
+    --color-pink-deep: #D98FAF;
+    --color-pink-mauve: #B97897;
+    --color-cream: #FFF9F5;
+    --color-surface: #FCF7F8;
+    --color-gold: #C9A227;
+    --color-ink: #3A3033;
+    --color-muted: #75686D;
+    --color-line: #EBDDE2;
+
+    --font-display: 'Playfair Display', ui-serif, Georgia, serif;
+    --font-body: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+
+    /* Soft shadows per DESIGN.md §10 (no strong black shadows) */
+    --shadow-card: 0 8px 30px rgba(58, 48, 51, 0.06);
+    --shadow-card-hover: 0 12px 35px rgba(58, 48, 51, 0.10);
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+}
+
+.font-display {
+    font-family: var(--font-display);
+}
+
+/* Elegant, subtle motion per DESIGN.md §30 (200–400ms ease-out) */
+@media (prefers-reduced-motion: no-preference) {
+    .mutya-rise {
+        animation: mutya-rise 0.4s ease-out both;
+    }
+}
+
+@keyframes mutya-rise {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
