@@ -136,102 +136,166 @@
                     @endif
                 </div>
 
-                {{-- ============ Add to cart form — existing route & parameter contract ============ --}}
-                @if ($product->variants->isNotEmpty() && $totalStock > 0)
-                    <form method="POST" action="{{ route('cart.items.store') }}" class="mt-6 space-y-5" id="pd-cart-form">
-                        @csrf
+                
+{{-- ============ Add to cart form ============ --}}
+@if ($product->variants->isNotEmpty() && $totalStock > 0)
+    <form method="POST"
+        action="{{ route('cart.items.store') }}"
+        class="mt-6 space-y-5"
+        id="pd-cart-form">
+        @csrf
 
-                        {{-- Variant selector --}}
-                        <fieldset>
-                            <legend class="text-xs font-semibold uppercase tracking-wider text-ink mb-2">Varian</legend>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                                @foreach ($product->variants as $index => $variant)
-                                    @php $sellable = $variant->stock_qty > 0; @endphp
-                                    <label class="relative rounded-xl border p-3 text-left transition min-h-[44px]
-                                        {{ $sellable
-                                            ? 'cursor-pointer border-line hover:border-pink-deep has-[:checked]:border-pink-deep has-[:checked]:bg-pink-soft/25'
-                                            : 'opacity-45 cursor-not-allowed border-line' }}">
-                                        <input type="radio" name="product_variant_id" value="{{ $variant->id }}"
-                                            class="sr-only pd-variant-radio"
-                                            data-final-price="{{ (int) round($variant->finalPrice()) }}"
-                                            data-stock="{{ (int) $variant->stock_qty }}"
-                                            {{ $index === 0 && $sellable ? 'checked' : '' }}
-                                            {{ $sellable ? '' : 'disabled' }}>
-                                        <span class="flex items-center gap-2 min-w-0">
-                                            @if ($variant->color_hex)
-                                                <span class="w-3.5 h-3.5 rounded-full border border-line shrink-0" style="background-color: {{ $variant->color_hex }}"></span>
-                                            @endif
-                                            <span class="text-xs font-medium text-ink truncate">{{ $variant->name }}</span>
-                                        </span>
-                                        <span class="block text-[10px] text-muted mt-1">
-                                            {{ $variant->size ?? 'All Size' }}
-                                            @if ($variant->additional_price > 0)
-                                                · +Rp{{ number_format($variant->additional_price, 0, ',', '.') }}
-                                            @endif
-                                            @unless ($sellable)
-                                                · Habis
-                                            @endunless
-                                        </span>
-                                    </label>
-                                @endforeach
-                            </div>
-                        </fieldset>
+        {{-- Variant selector --}}
+        <fieldset>
+            <legend class="text-xs font-semibold uppercase tracking-wider text-ink mb-2">
+                Varian
+            </legend>
 
-                        {{-- Quantity selector (max bounded by real stock; server re-validates) --}}
-                        <div class="flex items-center gap-4">
-                            <div class="flex items-center border border-line rounded-xl overflow-hidden bg-white">
-                                <button type="button" class="pd-qty-btn w-11 h-11 text-ink hover:bg-cream text-base" data-action="dec" aria-label="Kurangi kuantitas">−</button>
-                                <input type="number" name="quantity" id="pd-quantity" value="1" min="1"
-                                    max="{{ max(1, $product->variants->where('is_active', true)->max('stock_qty')) }}"
-                                    class="w-14 h-11 text-center text-sm text-ink border-x border-line focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
-                                <button type="button" class="pd-qty-btn w-11 h-11 text-ink hover:bg-cream text-base" data-action="inc" aria-label="Tambah kuantitas">+</button>
-                            </div>
-                            <p class="text-[11px] text-muted">Maksimum sesuai stok varian terpilih.</p>
-                        </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                @foreach ($product->variants as $index => $variant)
+                    @php $sellable = $variant->stock_qty > 0; @endphp
 
-                        {{-- Primary actions --}}
-                        <div class="flex items-stretch gap-3 pt-1">
-                            <x-primary-button class="flex-1 sm:flex-none sm:min-w-[220px]">
-                                Tambah ke Keranjang
-                            </x-primary-button>
-                            @auth
-                                <form method="POST" action="{{ route('wishlist.toggle', $product) }}"
-                                    class="self-stretch shrink-0" data-wishlist-form>
-                                    @csrf
-                                    <button type="submit" data-filled="{{ in_array($product->id, $wishlistedIds) ? '1' : '0' }}"
-                                        aria-label="{{ in_array($product->id, $wishlistedIds) ? 'Hapus dari wishlist' : 'Tambah ke wishlist' }}"
-                                        class="h-full min-h-[48px] w-12 inline-flex items-center justify-center rounded-xl border transition cursor-pointer
-                                            {{ in_array($product->id, $wishlistedIds) ? 'border-pink-deep bg-pink-soft/25 text-pink-deep' : 'border-line text-pink-deep hover:border-pink-deep' }}">
-                                        <svg class="w-5 h-5 {{ in_array($product->id, $wishlistedIds) ? 'fill-pink-deep' : 'fill-none' }} stroke-current" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 20s-7-4.6-9.2-9A5.2 5.2 0 0112 6.5 5.2 5.2 0 0121.2 11C19 15.4 12 20 12 20z"/>
-                                        </svg>
-                                    </button>
-                                </form>
-                            @else
-                                <a href="{{ route('login') }}" title="Masuk untuk menyimpan ke wishlist"
-                                    class="w-12 min-h-[48px] inline-flex items-center justify-center rounded-xl border border-pink-deep text-pink-deep hover:bg-pink-soft/30 transition shrink-0">
-                                    <svg class="w-5 h-5 fill-none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 20s-7-4.6-9.2-9A5.2 5.2 0 0112 6.5 5.2 5.2 0 0121.2 11C19 15.4 12 20 12 20z"/>
-                                    </svg>
-                                    <span class="sr-only">Simpan ke wishlist (butuh akun)</span>
-                                </a>
-                            @endauth
-                        </div>
-                    </form>
-                @elseif ($totalStock <= 0)
-                    <div class="mt-6">
-                        <button type="button" disabled
-                            class="w-full sm:w-auto sm:min-w-[220px] min-h-[48px] inline-flex items-center justify-center px-7 rounded-xl bg-gray-100 text-gray-500 text-sm font-medium cursor-not-allowed">
-                            Stok Habis
-                        </button>
-                        <p class="text-[11px] text-muted mt-2">Varian akan muncul kembali setelah restock.</p>
-                    </div>
-                @else
-                    {{-- No variants configured — do not invent an add-to-cart path (backend requires a variant). --}}
-                    <p class="mt-6 text-xs text-muted bg-white border border-line rounded-xl px-4 py-3">
-                        Produk ini belum memiliki varian yang dapat dibeli. Hubungi kami untuk informasi ketersediaan.
-                    </p>
-                @endif
+                    <label class="relative rounded-xl border p-3 text-left transition min-h-[44px]
+                        {{ $sellable
+                            ? 'cursor-pointer border-line hover:border-pink-deep has-[:checked]:border-pink-deep has-[:checked]:bg-pink-soft/25'
+                            : 'opacity-45 cursor-not-allowed border-line' }}">
+
+                        <input type="radio"
+                            name="product_variant_id"
+                            value="{{ $variant->id }}"
+                            class="sr-only pd-variant-radio"
+                            data-final-price="{{ (int) round($variant->finalPrice()) }}"
+                            data-stock="{{ (int) $variant->stock_qty }}"
+                            {{ $index === 0 && $sellable ? 'checked' : '' }}
+                            {{ $sellable ? '' : 'disabled' }}>
+
+                        <span class="flex items-center gap-2 min-w-0">
+                            @if ($variant->color_hex)
+                                <span class="w-3.5 h-3.5 rounded-full border border-line shrink-0"
+                                    style="background-color: {{ $variant->color_hex }}"></span>
+                            @endif
+
+                            <span class="text-xs font-medium text-ink truncate">
+                                {{ $variant->name }}
+                            </span>
+                        </span>
+
+                        <span class="block text-[10px] text-muted mt-1">
+                            {{ $variant->size ?? 'All Size' }}
+
+                            @if ($variant->additional_price > 0)
+                                · +Rp{{ number_format($variant->additional_price, 0, ',', '.') }}
+                            @endif
+
+                            @unless ($sellable)
+                                · Habis
+                            @endunless
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+        </fieldset>
+
+        {{-- Quantity selector --}}
+        <div class="flex items-center gap-4">
+            <div class="flex items-center border border-line rounded-xl overflow-hidden bg-white">
+                <button type="button"
+                    class="pd-qty-btn w-11 h-11 text-ink hover:bg-cream text-base"
+                    data-action="dec"
+                    aria-label="Kurangi kuantitas">−</button>
+
+                <input type="number"
+                    name="quantity"
+                    id="pd-quantity"
+                    value="1"
+                    min="1"
+                    max="{{ max(1, $product->variants->where('is_active', true)->max('stock_qty')) }}"
+                    class="w-14 h-11 text-center text-sm text-ink border-x border-line focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
+
+                <button type="button"
+                    class="pd-qty-btn w-11 h-11 text-ink hover:bg-cream text-base"
+                    data-action="inc"
+                    aria-label="Tambah kuantitas">+</button>
+            </div>
+
+            <p class="text-[11px] text-muted">
+                Maksimum sesuai stok varian terpilih.
+            </p>
+        </div>
+
+        {{-- Cart button only: no nested Wishlist form --}}
+        <div class="pt-1">
+            <x-primary-button class="w-full sm:w-auto sm:min-w-[220px]">
+                Tambah ke Keranjang
+            </x-primary-button>
+        </div>
+    </form>
+
+    {{-- Wishlist is a separate form, outside the cart form --}}
+    <div class="mt-3 flex items-center gap-3">
+        @auth
+            @php $isWishlisted = in_array($product->id, $wishlistedIds); @endphp
+
+            <form method="POST"
+                action="{{ route('wishlist.toggle', $product) }}"
+                class="inline-flex"
+                data-wishlist-form>
+                @csrf
+
+                <button type="submit"
+                    data-filled="{{ $isWishlisted ? '1' : '0' }}"
+                    aria-label="{{ $isWishlisted ? 'Hapus dari wishlist' : 'Tambah ke wishlist' }}"
+                    title="{{ $isWishlisted ? 'Hapus dari wishlist' : 'Tambah ke wishlist' }}"
+                    class="h-12 w-12 inline-flex items-center justify-center rounded-xl border transition cursor-pointer
+                        {{ $isWishlisted
+                            ? 'border-pink-deep bg-pink-soft/25 text-pink-deep'
+                            : 'border-line text-pink-deep hover:border-pink-deep hover:bg-pink-soft/30' }}">
+
+                    <svg class="w-5 h-5 {{ $isWishlisted ? 'fill-pink-deep' : 'fill-none' }} stroke-current"
+                        stroke-width="1.7"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 20s-7-4.6-9.2-9A5.2 5.2 0 0112 6.5 5.2 5.2 0 0121.2 11C19 15.4 12 20 12 20z"/>
+                    </svg>
+                </button>
+            </form>
+        @else
+            <a href="{{ route('login') }}"
+                title="Masuk untuk menyimpan ke wishlist"
+                aria-label="Masuk untuk menyimpan ke wishlist"
+                class="h-12 w-12 inline-flex items-center justify-center rounded-xl border border-pink-deep text-pink-deep hover:bg-pink-soft/30 transition">
+
+                <svg class="w-5 h-5 fill-none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 20s-7-4.6-9.2-9A5.2 5.2 0 0112 6.5 5.2 5.2 0 0121.2 11C19 15.4 12 20 12 20z"/>
+                </svg>
+            </a>
+        @endauth
+    </div>
+
+@elseif ($totalStock <= 0)
+    <div class="mt-6">
+        <button type="button"
+            disabled
+            class="w-full sm:w-auto sm:min-w-[220px] min-h-[48px] inline-flex items-center justify-center px-7 rounded-xl bg-gray-100 text-gray-500 text-sm font-medium cursor-not-allowed">
+            Stok Habis
+        </button>
+
+        <p class="text-[11px] text-muted mt-2">
+            Varian akan muncul kembali setelah restock.
+        </p>
+    </div>
+@else
+    <p class="mt-6 text-xs text-muted bg-white border border-line rounded-xl px-4 py-3">
+        Produk ini belum memiliki varian yang dapat dibeli. Hubungi kami untuk informasi ketersediaan.
+    </p>
+@endif
+
 
                 {{-- Description --}}
                 @if ($product->description)
