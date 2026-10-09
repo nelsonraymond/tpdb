@@ -1,139 +1,130 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-layouts.app>
+    @section('title', 'Wishlist Saya — Mutya Store')
 
-    <title>Wishlist Saya - Mutya Store</title>
+    {{-- Tahap 5: migrated to shared app layout (navbar/footer/flash) + design tokens.
+         Backend contract unchanged: wishlist.destroy (DELETE) / wishlist.toggle (POST). --}}
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
 
-    @vite(['resources/css/app.css'])
+        {{-- Breadcrumb --}}
+        <nav aria-label="Breadcrumb" class="text-xs text-muted mb-6">
+            <ol class="flex items-center gap-1.5 flex-wrap">
+                <li><a href="{{ route('home') }}" class="hover:text-pink-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep rounded transition">Beranda</a></li>
+                <li aria-hidden="true">/</li>
+                <li aria-current="page" class="text-ink font-medium">Wishlist</li>
+            </ol>
+        </nav>
 
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #FFF9F5;
-            color: #3A3033;
-        }
-        .font-serif-display {
-            font-family: 'Playfair Display', serif;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col bg-[#FFF9F5]">
-    <!-- Navbar -->
-    <header class="bg-white border-b border-[#EBDDE2] sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="inline-flex items-center space-x-2">
-                <span class="text-[#D98FAF] text-lg">❀</span>
-                <span class="font-serif-display text-xl font-bold tracking-wider text-[#3A3033] uppercase">MUTYA</span>
-            </a>
-
-            <nav class="hidden md:flex items-center space-x-6 text-sm">
-                <a href="{{ route('home') }}" class="text-[#75686D] hover:text-[#D98FAF] transition">Beranda</a>
-                <a href="{{ route('shop.index') }}" class="text-[#75686D] hover:text-[#D98FAF] transition">Koleksi Produk</a>
-            </nav>
-
-            <div class="flex items-center space-x-4 text-sm">
-                <a href="{{ route('wishlist.index') }}" class="text-[#D98FAF] font-semibold text-xs flex items-center">
-                    <span class="mr-1">♥</span> Wishlist
-                </a>
-                <a href="{{ route('cart.index') }}" class="text-[#75686D] hover:text-[#D98FAF] text-xs font-medium flex items-center">
-                    <span class="mr-1">🛒</span> Keranjang
-                </a>
-                <a href="{{ route('profile') }}" class="text-[#75686D] hover:text-[#3A3033] text-xs font-medium">
-                    Akun
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        {{-- Page header --}}
         <div class="mb-8">
-            <h1 class="font-serif-display text-2xl sm:text-3xl font-bold text-[#3A3033]">Daftar Keinginan (Wishlist)</h1>
-            <p class="text-xs text-[#75686D] mt-1">Simpan produk hijab yang Anda sukai untuk dibeli nanti</p>
+            <p class="text-[11px] uppercase tracking-[0.2em] text-pink-mauve font-semibold mb-1">Akun Saya</p>
+            <h1 class="font-display text-2xl sm:text-3xl font-bold text-ink">Daftar Keinginan (Wishlist)</h1>
+            <p class="text-sm text-muted mt-1.5">
+                Simpan produk hijab yang Anda sukai untuk dibeli nanti
+                @if ($wishlists->total() > 0)
+                    — {{ $wishlists->total() }} produk tersimpan
+                @endif
+            </p>
         </div>
 
-        @if(session('success'))
-            <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-sm text-emerald-800 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                <span>{{ session('success') }}</span>
-            </div>
-        @endif
+        {{-- Flash messages are rendered globally by the app layout (session('success')) --}}
 
-        @if($wishlists->isEmpty())
-            <div class="bg-white rounded-2xl border border-[#EBDDE2] p-12 text-center max-w-lg mx-auto shadow-xs">
-                <div class="w-16 h-16 rounded-full bg-pink-50 text-[#D98FAF] flex items-center justify-center mx-auto mb-4 text-2xl">
-                    ♡
+        @if ($wishlists->isEmpty())
+            {{-- Empty state with CTA back to the catalog --}}
+            <div class="bg-white rounded-2xl border border-line p-10 sm:p-12 text-center max-w-lg mx-auto shadow-card">
+                <div class="w-16 h-16 rounded-full bg-pink-soft/40 text-pink-deep flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 20s-7-4.6-9.2-9A5.2 5.2 0 0112 6.5 5.2 5.2 0 0121.2 11C19 15.4 12 20 12 20z"/>
+                    </svg>
                 </div>
-                <h2 class="font-serif-display text-xl font-bold text-[#3A3033]">Wishlist Anda Masih Kosong</h2>
-                <p class="text-xs text-[#75686D] mt-1 mb-6">Tandai hijab favorit dengan ikon hati untuk menyimpannya di sini.</p>
+                <h2 class="font-display text-xl font-bold text-ink">Wishlist Anda Masih Kosong</h2>
+                <p class="text-sm text-muted mt-1.5 mb-6">Tandai hijab favorit dengan ikon hati untuk menyimpannya di sini.</p>
                 <a href="{{ route('shop.index') }}"
-                    class="inline-block px-6 py-2.5 rounded-xl bg-[#D98FAF] hover:bg-[#B97897] text-white font-medium text-xs transition shadow-xs">
+                    class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-pink-deep hover:bg-pink-mauve text-white font-medium text-sm transition shadow-sm min-h-[48px]">
                     Jelajahi Koleksi Hijab
                 </a>
             </div>
         @else
+            {{-- Responsive grid, consistent with the catalog product cards.
+                 Each card is a standalone <article>: detail link + delete form as siblings (no nested forms). --}}
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                @foreach($wishlists as $wish)
+                @foreach ($wishlists as $wish)
                     @php $product = $wish->product; @endphp
-                    @if($product)
-                        <div class="bg-white rounded-2xl border border-[#EBDDE2] overflow-hidden flex flex-col justify-between group shadow-xs hover:shadow-md transition">
-                            <div class="relative aspect-4/5 block overflow-hidden bg-[#FFF9F5]">
-                                @php $primaryImg = $product->primaryImage(); @endphp
-                                @if ($primaryImg)
-                                    <img src="{{ Storage::url($primaryImg->image_path) }}" alt="{{ $product->name }}"
-                                        class="w-full h-full object-cover group-hover:scale-103 transition duration-500">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-[#D98FAF] bg-pink-50/50">
-                                        <span class="font-serif-display text-base italic">Mutya</span>
-                                    </div>
-                                @endif
+                    @if ($product)
+                        <article class="group relative flex flex-col bg-white border border-line/80 rounded-md overflow-hidden hover:border-pink-mauve/50 transition-all duration-300 hover:shadow-xs">
 
-                                <form method="POST" action="{{ route('wishlist.destroy', $product) }}" class="absolute top-2.5 right-2.5">
+                            {{-- Thumbnail (4:5, primary image from eager-loaded relation) --}}
+                            <div class="relative aspect-[4/5] w-full overflow-hidden bg-[#FAF6F7]">
+                                <a href="{{ route('shop.product', $product->slug) }}" class="block w-full h-full" aria-label="{{ $product->name }}">
+                                    @php $primaryImg = $product->primaryImage(); @endphp
+                                    @if ($primaryImg)
+                                        <img src="{{ Storage::url($primaryImg->image_path) }}"
+                                            alt="{{ $primaryImg->alt_text ?? $product->name }}"
+                                            class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]" loading="lazy">
+                                    @else
+                                        <div class="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-[#FAF6F7] to-[#F3EBEE]">
+                                            <span class="text-[10px] tracking-[0.25em] uppercase text-muted font-medium mb-1">
+                                                {{ $product->category?->name ?? 'Koleksi Hijab' }}
+                                            </span>
+                                            <span class="font-display italic text-sm text-ink/80 leading-snug line-clamp-2">{{ $product->name }}</span>
+                                        </div>
+                                    @endif
+                                </a>
+
+                                {{-- Remove action — existing DELETE /wishlist/{product} contract --}}
+                                <form method="POST" action="{{ route('wishlist.destroy', $product) }}" class="absolute top-2.5 right-2.5 z-10">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" title="Hapus dari Wishlist"
-                                        class="w-8 h-8 rounded-full bg-white/90 text-rose-500 hover:text-rose-700 flex items-center justify-center shadow-xs transition cursor-pointer">
-                                        ♥
+                                    <button type="submit" title="Hapus dari Wishlist" aria-label="Hapus {{ $product->name }} dari wishlist"
+                                        class="w-9 h-9 rounded-full bg-white/85 backdrop-blur border border-line inline-flex items-center justify-center text-pink-deep transition duration-300 hover:border-pink-deep hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep cursor-pointer">
+                                        <svg class="w-[18px] h-[18px] fill-pink-deep" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 20s-7-4.6-9.2-9A5.2 5.2 0 0112 6.5 5.2 5.2 0 0121.2 11C19 15.4 12 20 12 20z"/>
+                                        </svg>
                                     </button>
                                 </form>
                             </div>
 
-                            <div class="p-4 flex-1 flex flex-col justify-between">
-                                <div>
-                                    <span class="text-[10px] text-[#75686D] block mb-0.5">{{ $product->category->name }}</span>
-                                    <a href="{{ route('shop.product', $product->slug) }}"
-                                        class="font-medium text-sm text-[#3A3033] hover:text-[#D98FAF] line-clamp-1">
-                                        {{ $product->name }}
-                                    </a>
-                                    <div class="text-xs font-semibold text-[#3A3033] mt-1.5">
-                                        Rp{{ number_format($product->base_price, 0, ',', '.') }}
-                                    </div>
+                            {{-- Product info: name, price, stock status (real data via model helpers) --}}
+                            <div class="p-3.5 sm:p-4 flex-1 flex flex-col justify-between gap-3">
+                                <div class="space-y-1 min-w-0">
+                                    <p class="text-[11px] tracking-wider uppercase text-muted font-medium line-clamp-1">
+                                        {{ $product->material ?? $product->category?->name }}
+                                    </p>
+                                    <h3 class="text-sm font-medium text-ink leading-snug">
+                                        <a href="{{ route('shop.product', $product->slug) }}" class="hover:text-pink-mauve transition-colors line-clamp-1">
+                                            {{ $product->name }}
+                                        </a>
+                                    </h3>
                                 </div>
 
-                                <div class="mt-3 pt-3 border-t border-[#EBDDE2]/60 flex items-center justify-between">
+                                <div class="space-y-2 pt-2 border-t border-line/60">
+                                    <div class="flex items-baseline justify-between gap-2">
+                                        <x-price-display :price="$product->base_price" :compare-at="(float) $product->compare_at_price" />
+                                        @if ($product->hasAvailableStock())
+                                            <span class="text-[10px] font-normal text-muted/90 shrink-0">Tersedia</span>
+                                        @else
+                                            <span class="text-[10px] font-medium text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded-xs shrink-0">Habis</span>
+                                        @endif
+                                    </div>
+
+                                    {{-- Cart add requires a specific variant id (cart.items.store contract),
+                                         so the CTA leads to the product detail page where variants are chosen. --}}
                                     <a href="{{ route('shop.product', $product->slug) }}"
-                                        class="w-full py-1.5 rounded-xl bg-[#FFF9F5] hover:bg-[#F8C8DC]/30 border border-[#EBDDE2] text-xs font-medium text-[#3A3033] text-center transition">
+                                        class="w-full inline-flex items-center justify-center py-2.5 rounded-xl bg-cream hover:bg-pink-soft/40 border border-line text-xs font-medium text-ink text-center transition min-h-[40px]">
                                         Lihat Pilihan Varian
                                     </a>
                                 </div>
                             </div>
-                        </div>
+                        </article>
                     @endif
                 @endforeach
             </div>
 
-            @if($wishlists->hasPages())
-                <div class="mt-8">
-                    {{ $wishlists->links() }}
+            @if ($wishlists->hasPages())
+                <div class="mt-10">
+                    <x-pagination :paginator="$wishlists" />
                 </div>
             @endif
         @endif
-    </main>
-</body>
-</html>
+    </div>
+</x-layouts.app>
