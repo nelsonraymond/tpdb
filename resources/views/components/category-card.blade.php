@@ -1,41 +1,34 @@
-@props(['category', 'product' => null, 'size' => 'md', 'showCount' => false])
+@props(['category', 'product' => null, 'size' => 'md'])
 
-{{-- CategoryCard — DESIGN.md §17 editorial mosaic tile:
-     image-led, no heavy outline, Playfair name overlay, product count as subtle support info.
-     Works both inside a sized grid cell (mosaic) and standalone (media block keeps 4:5/wide ratio). --}}
+@php
+    $catImg = $product?->primaryImage() ?? $category->products->first(fn ($p) => $p->primaryImage())?->primaryImage();
+@endphp
+
+{{-- Category Card — DESIGN.md v3 §7.4: Editorial category tile (zero botanical artifacts) --}}
 <a href="{{ route('shop.category', $category->slug) }}"
-    {{ $attributes->merge(['class' => 'group relative block rounded-2xl overflow-hidden bg-surface min-h-[140px] shadow-card hover:shadow-card-hover transition-all duration-300']) }}>
+    {{ $attributes->merge(['class' => 'group relative block overflow-hidden rounded-md border border-line bg-white transition-all duration-300 hover:border-pink-mauve/60 hover:shadow-xs']) }}>
 
-    {{-- Media layer: absolute fills the grid cell; the aspect wrapper gives height when standalone. --}}
-    <div class="absolute inset-0">
-        @if ($product?->primaryImage())
-            <img src="{{ Storage::url($product->primaryImage()->image_path) }}" alt="{{ $category->name }}"
-                class="w-full h-full object-cover group-hover:scale-103 transition duration-500" loading="lazy">
-        @elseif ($category->products->isNotEmpty() && $category->products->first()?->primaryImage())
-            <img src="{{ Storage::url($category->products->first()->primaryImage()->image_path) }}" alt="{{ $category->name }}"
-                class="w-full h-full object-cover group-hover:scale-103 transition duration-500" loading="lazy">
+    <div class="{{ $size === 'tall' ? 'aspect-[4/5]' : ($size === 'wide' ? 'aspect-[16/9]' : 'aspect-[4/5]') }} w-full overflow-hidden bg-[#FAF6F7]">
+        @if ($catImg)
+            <img src="{{ Storage::url($catImg->image_path) }}" alt="{{ $category->name }}"
+                class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]" loading="lazy">
         @else
-            {{-- Graceful visual placeholder until real photography lands --}}
-            <div class="absolute inset-0 bg-gradient-to-br from-pink-soft/50 via-white to-cream">
-                <svg class="absolute right-3 bottom-3 w-16 h-16 text-pink-mauve opacity-20 pointer-events-none"
-                    viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
-                    <path d="M20 95 C22 70 28 50 45 30"/>
-                    <path d="M30 70 C18 66 12 55 14 42 C28 48 33 60 30 70Z"/>
-                    <circle cx="47" cy="26" r="6"/><circle cx="38" cy="20" r="4.5"/><circle cx="56" cy="20" r="4.5"/>
-                </svg>
+            {{-- Tasteful neutral editorial placeholder --}}
+            <div class="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-[#FAF6F7] to-[#F1E8EC] transition-transform duration-500 ease-out group-hover:scale-[1.02]">
+                <span class="text-[10px] tracking-[0.25em] uppercase text-muted font-medium mb-1">Kategori</span>
+                <span class="font-display text-lg sm:text-xl font-medium text-ink">{{ $category->name }}</span>
             </div>
         @endif
     </div>
 
-    {{-- Invisible sizing spacer so the card has height outside fixed-size grids --}}
-    <div aria-hidden="true" class="{{ $size === 'wide' ? 'aspect-16/10 sm:aspect-21/9' : 'aspect-4/5' }}"></div>
-
-    {{-- Legibility scrim + editorial caption --}}
-    <div class="absolute inset-0 bg-gradient-to-t from-ink/55 via-ink/5 to-transparent" aria-hidden="true"></div>
-    <div class="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-        <p class="font-display text-lg sm:text-xl text-white leading-snug">{{ $category->name }}</p>
-        <p class="mt-0.5 text-[11px] tracking-wide text-white/70 group-hover:text-pink-soft transition duration-300">
-            @if ($showCount){{ $category->products->count() }} pilihan · @endif Belanja →
-        </p>
+    {{-- Clean typographic overlay --}}
+    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 via-ink/40 to-transparent pt-12 pb-3.5 px-4 flex items-end justify-between">
+        <div>
+            <h3 class="text-white font-medium text-sm sm:text-base leading-tight">{{ $category->name }}</h3>
+            <p class="text-white/75 text-[11px] mt-0.5">{{ $category->products->count() }} Produk</p>
+        </div>
+        <span class="text-white/90 text-xs font-medium group-hover:text-pink-soft group-hover:translate-x-0.5 transition-all duration-200">
+            Lihat →
+        </span>
     </div>
 </a>

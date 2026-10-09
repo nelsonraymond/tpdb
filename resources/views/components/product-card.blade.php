@@ -1,52 +1,110 @@
 @props(['product'])
 
-{{-- Product card per DESIGN.md §15: image 4:5, name, price, badges, wishlist, add to cart --}}
-<div {{ $attributes->merge(['class' => 'bg-white rounded-2xl border border-line overflow-hidden group flex flex-col shadow-card hover:shadow-card-hover transition-all duration-300 relative']) }}>
-    <a href="{{ route('shop.product', $product->slug) }}" class="relative aspect-4/5 block overflow-hidden bg-cream">
-        @php $primaryImg = $product->primaryImage(); @endphp
-        @if ($primaryImg)
-            <img src="{{ Storage::url($primaryImg->image_path) }}" alt="{{ $product->name }}"
-                class="w-full h-full object-cover group-hover:scale-103 transition duration-500" loading="lazy">
-        @else
-            <div class="w-full h-full flex items-center justify-center bg-gradient-to-b from-pink-soft/40 to-cream">
-                <span class="font-display italic text-sm text-pink-mauve/70">{{ $product->name }}</span>
-            </div>
-        @endif
+@php
+    $primaryImg = $product->primaryImage();
+    $secondaryImg = $product->images->first(fn ($img) => $primaryImg && $img->id !== $primaryImg->id);
+    $activeVariants = $product->variants->where('is_active', true);
+    $colorVariants = $activeVariants->filter(fn ($v) => !empty($v->color_hex))->unique('color_hex')->take(4);
+    $discountPercent = ($product->compare_at_price && $product->compare_at_price > $product->base_price)
+        ? round((($product->compare_at_price - $product->base_price) / $product->compare_at_price) * 100)
+        : null;
+@endphp
 
-        {{-- Badges --}}
-        <div class="absolute top-2.5 left-2.5 flex flex-col gap-1">
-            @if ($product->is_best_seller)
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-pink-deep text-white shadow-xs">Best Seller</span>
-            @endif
-            @if ($product->is_featured)
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gold text-white shadow-xs">Pilihan</span>
-            @endif
-        </div>
+{{-- Product Card — DESIGN.md v3 §8: Fashion retail card with 4:5 image, clean typography, zero clutter --}}
+<article {{ $attributes->merge(['class' => 'group relative flex flex-col bg-white border border-line/80 rounded-md overflow-hidden hover:border-pink-mauve/50 transition-all duration-300 hover:shadow-xs']) }}>
 
-    </a>
-
-    {{-- Wishlist action (§19) — real toggle, delegated to shared component --}}
-    <x-wishlist-button :product="$product" class="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition duration-300" />
-
-    <div class="p-4 flex-1 flex flex-col justify-between">
-        <div>
-            <span class="text-[11px] text-muted block mb-0.5">{{ $product->category?->name }}</span>
-            <a href="{{ route('shop.product', $product->slug) }}"
-                class="font-medium text-sm text-ink hover:text-pink-deep transition line-clamp-1">
-                {{ $product->name }}
-            </a>
-            <div class="text-[11px] text-muted mt-0.5">{{ $product->material }}</div>
-        </div>
-
-        <div class="mt-3 pt-3 border-t border-line/60 flex items-baseline justify-between gap-2">
-            <div class="min-w-0">
-                <x-price-display :price="$product->base_price" :compare-at="(float) $product->compare_at_price" />
-            </div>
-            @if ($product->hasAvailableStock())
-                <span class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full shrink-0">Tersedia</span>
+    {{-- Product Image Container (4:5 Aspect Ratio per §8) --}}
+    <div class="relative aspect-[4/5] w-full overflow-hidden bg-[#FAF6F7]">
+        <a href="{{ route('shop.product', $product->slug) }}" class="block w-full h-full" aria-label="{{ $product->name }}">
+            @if ($primaryImg)
+                <img src="{{ Storage::url($primaryImg->image_path) }}" alt="{{ $primaryImg->alt_text ?? $product->name }}"
+                    class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]" loading="lazy">
+                @if ($secondaryImg)
+                    <img src="{{ Storage::url($secondaryImg->image_path) }}" alt="{{ $secondaryImg->alt_text ?? $product->name }}"
+                        class="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" loading="lazy">
+                @endif
             @else
-                <span class="text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">Habis</span>
+                {{-- Tasteful neutral editorial image placeholder per §10 (warm tone, fashion typography, NO flowers or debug text) --}}
+                <div class="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-[#FAF6F7] to-[#F3EBEE] transition-transform duration-500 ease-out group-hover:scale-[1.02]">
+                    <span class="text-[10px] tracking-[0.25em] uppercase text-muted font-medium mb-1">
+                        {{ $product->category?->name ?? 'Koleksi Hijab' }}
+                    </span>
+                    <span class="font-display italic text-sm sm:text-base text-ink/80 leading-snug line-clamp-2">
+                        {{ $product->name }}
+                    </span>
+                    @if ($product->material)
+                        <span class="text-[11px] text-pink-mauve mt-2 tracking-wide font-normal">
+                            {{ $product->material }}
+                        </span>
+                    @endif
+                </div>
+            @endif
+        </a>
+
+        {{-- Product Badges (Top-Left, restrained rectangular tags) --}}
+        <div class="absolute top-2.5 left-2.5 flex flex-col items-start gap-1 pointer-events-none z-10">
+            @if ($product->is_best_seller)
+                <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase bg-pink-mauve text-white rounded-xs">
+                    Best Seller
+                </span>
+            @elseif ($discountPercent)
+                <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase bg-rose-600 text-white rounded-xs">
+                    -{{ $discountPercent }}%
+                </span>
+            @elseif ($product->is_featured)
+                <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase bg-ink text-white rounded-xs">
+                    Pilihan
+                </span>
+            @endif
+        </div>
+
+        {{-- Wishlist Toggle (Top-Right, subtle micro-action) --}}
+        <x-wishlist-button :product="$product"
+            class="absolute top-2.5 right-2.5 z-10 opacity-90 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100 transition-opacity duration-200" />
+    </div>
+
+    {{-- Product Metadata Stack --}}
+    <div class="p-3.5 sm:p-4 flex-1 flex flex-col justify-between gap-3">
+        <div class="space-y-1">
+            {{-- Category / Material micro-label --}}
+            <p class="text-[11px] tracking-wider uppercase text-muted font-medium line-clamp-1">
+                {{ $product->material ?? $product->category?->name }}
+            </p>
+
+            {{-- Product Name --}}
+            <h3 class="text-sm font-medium text-ink leading-snug">
+                <a href="{{ route('shop.product', $product->slug) }}" class="hover:text-pink-mauve transition-colors line-clamp-1">
+                    {{ $product->name }}
+                </a>
+            </h3>
+        </div>
+
+        <div class="space-y-2 pt-2 border-t border-line/60">
+            {{-- Price Display --}}
+            <div class="flex items-baseline justify-between gap-2">
+                <x-price-display :price="$product->base_price" :compare-at="(float) $product->compare_at_price" />
+
+                {{-- Stock Availability --}}
+                @if ($product->hasAvailableStock())
+                    <span class="text-[10px] font-normal text-muted/90 shrink-0">Tersedia</span>
+                @else
+                    <span class="text-[10px] font-medium text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded-xs shrink-0">Habis</span>
+                @endif
+            </div>
+
+            {{-- Color Variants / Options hint --}}
+            @if ($colorVariants->isNotEmpty())
+                <div class="flex items-center gap-1.5 pt-0.5" title="{{ $colorVariants->pluck('color_name')->join(', ') }}">
+                    @foreach ($colorVariants as $cVar)
+                        <span class="w-2.5 h-2.5 rounded-full border border-line shadow-2xs"
+                            style="background-color: {{ $cVar->color_hex }};"
+                            aria-label="{{ $cVar->color_name }}"></span>
+                    @endforeach
+                    @if ($activeVariants->count() > $colorVariants->count())
+                        <span class="text-[10px] text-muted ml-0.5">+{{ $activeVariants->count() - $colorVariants->count() }}</span>
+                    @endif
+                </div>
             @endif
         </div>
     </div>
-</div>
+</article>

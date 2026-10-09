@@ -73,14 +73,14 @@ class PaymentController extends Controller
             'expired' => '407',
         };
         $grossAmount = number_format((float) $order->grand_total, 2, '.', '');
-        $signature = hash('sha512', $order->order_number . $statusCode . $grossAmount . $serverKey);
+        $signature = hash('sha512', $order->order_number.$statusCode.$grossAmount.$serverKey);
 
         $payload = [
             'order_id' => $order->order_number,
             'status_code' => $statusCode,
             'gross_amount' => $grossAmount,
             'signature_key' => $signature,
-            'transaction_id' => 'SIM-' . uniqid(),
+            'transaction_id' => 'SIM-'.uniqid(),
             'transaction_status' => match ($validated['status']) {
                 'paid' => 'settlement',
                 'failed' => 'deny',

@@ -30,14 +30,14 @@ class MidtransPaymentGateway implements PaymentGatewayInterface
     public function createPayment(Order $order, array $options = []): array
     {
         // Generate simulated or real token structure
-        $transactionReference = 'TRX-' . $order->order_number . '-' . strtoupper(Str::random(6));
-        $snapToken = 'SNAP-' . Str::uuid()->toString();
+        $transactionReference = 'TRX-'.$order->order_number.'-'.strtoupper(Str::random(6));
+        $snapToken = 'SNAP-'.Str::uuid()->toString();
 
         $baseUrl = $this->isProduction
             ? 'https://app.midtrans.com/snap/v2/vtweb/'
             : 'https://app.sandbox.midtrans.com/snap/v2/vtweb/';
 
-        $paymentUrl = $baseUrl . $snapToken;
+        $paymentUrl = $baseUrl.$snapToken;
 
         return [
             'transaction_reference' => $transactionReference,
@@ -65,7 +65,7 @@ class MidtransPaymentGateway implements PaymentGatewayInterface
             return false;
         }
 
-        $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $this->serverKey);
+        $expectedSignature = hash('sha512', $orderId.$statusCode.$grossAmount.$this->serverKey);
 
         return hash_equals($expectedSignature, $receivedSignature);
     }

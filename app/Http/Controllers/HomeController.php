@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Review;
+use App\Models\Voucher;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -51,6 +52,23 @@ class HomeController extends Controller
                 ->orderBy('material')
                 ->limit(6)
                 ->pluck('material'),
+            'vouchers' => Voucher::query()
+                ->where('is_active', true)
+                ->where(function ($query) {
+                    $query->whereNull('starts_at')
+                        ->orWhere('starts_at', '<=', now());
+                })
+                ->where(function ($query) {
+                    $query->whereNull('expires_at')
+                        ->orWhere('expires_at', '>=', now());
+                })
+                ->where(function ($query) {
+                    $query->whereNull('usage_limit')
+                        ->orWhereColumn('used_count', '<', 'usage_limit');
+                })
+                ->orderBy('expires_at')
+                ->take(4)
+                ->get(),
             // Social proof: only genuine published reviews; empty state handled in the view.
             'reviews' => Review::query()
                 ->where('is_published', true)

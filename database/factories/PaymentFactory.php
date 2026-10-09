@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,10 +19,10 @@ class PaymentFactory extends Factory
     public function definition(): array
     {
         return [
-            'order_id' => \App\Models\Order::factory(),
+            'order_id' => Order::factory(),
             'provider' => 'midtrans',
             'payment_method' => 'midtrans_snap',
-            'transaction_reference' => 'TRX-' . strtoupper(fake()->bothify('????#####')),
+            'transaction_reference' => 'TRX-'.strtoupper(fake()->bothify('????#####')),
             'amount' => 165000,
             'status' => 'pending',
             'paid_at' => null,

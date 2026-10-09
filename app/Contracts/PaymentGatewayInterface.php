@@ -3,6 +3,7 @@
 namespace App\Contracts;
 
 use App\Models\Order;
+use Carbon\CarbonInterface;
 
 interface PaymentGatewayInterface
 {
@@ -41,7 +42,7 @@ interface PaymentGatewayInterface
      *     status: 'pending'|'paid'|'failed'|'expired'|'refunded',
      *     payment_method: ?string,
      *     amount: float,
-     *     paid_at: ?\Carbon\CarbonInterface,
+     *     paid_at: ?CarbonInterface,
      *     raw: array<string, mixed>
      * }
      */
