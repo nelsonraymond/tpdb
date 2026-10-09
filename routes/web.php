@@ -17,14 +17,20 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WishlistController;
+use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
 
 // Public Catalog Routes
 Route::get('/shop', [CatalogController::class, 'index'])->name('shop.index');
+// Canonical product detail URL — declared before the category wildcard so
+// /shop/produk/{slug} never falls through to /shop/{category:slug}.
+Route::get('/shop/produk/{product:slug}', [CatalogController::class, 'show'])->name('shop.product');
 Route::get('/shop/{category:slug}', [CatalogController::class, 'index'])->name('shop.category');
-Route::get('/product/{product:slug}', [CatalogController::class, 'show'])->name('shop.product');
+// Legacy product URLs redirect to the canonical /shop/produk/ location.
+Route::get('/product/{product:slug}', fn (Product $product) => redirect()->route('shop.product', $product, 301))
+    ->name('shop.product.legacy');
 
 // Customer Guest Routes
 Route::middleware('guest')->group(function () {

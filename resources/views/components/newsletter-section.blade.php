@@ -14,7 +14,7 @@
         <p class="text-sm text-muted mt-3 leading-relaxed">Koleksi baru, cerita bahan, dan penawaran khusus — langsung ke inbox Anda. Tanpa spam.</p>
 
         <form class="mt-6 flex flex-col sm:flex-row gap-3 max-w-md mx-auto" action="#" method="POST"
-            onsubmit="event.preventDefault(); const f=this; if(!f.querySelector('input').checkValidity()){f.querySelector('input').reportValidity(); return;} f.querySelector('input').value=''; f.querySelector('button').textContent='Berhasil ✦'; f.querySelector('[data-newsletter-note]').classList.remove('hidden');">
+            onsubmit="event.preventDefault(); const f=this; if(!f.querySelector('input').checkValidity()){f.querySelector('input').reportValidity(); return;} f.querySelector('input').value=''; f.querySelector('button').textContent='Berhasil'; f.querySelector('[data-newsletter-note]').classList.remove('hidden');">
             @csrf
             <label for="newsletter-email-input" class="sr-only">Alamat email</label>
             <input id="newsletter-email-input" type="email" required placeholder="Email Anda"
@@ -23,6 +23,6 @@
                 Join
             </button>
         </form>
-        <p data-newsletter-note class="hidden text-xs text-pink-mauve mt-3">Terima kasih — selamat datang di keluarga Mutya ✦</p>
+        <p data-newsletter-note class="hidden text-xs text-pink-mauve mt-3">Terima kasih — selamat datang di keluarga Mutya</p>
     </div>
 </section>

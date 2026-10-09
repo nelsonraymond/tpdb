@@ -39,9 +39,9 @@
                     </div>
                     {{-- Trust line — plain type, no pills/badges --}}
                     <p class="mt-10 text-[11px] text-muted tracking-wide">
-                        ✦ Material Premium <span class="mx-1.5 text-pink-soft" aria-hidden="true">·</span>
-                        ✦ Gratis Ongkir <span class="mx-1.5 text-pink-soft" aria-hidden="true">·</span>
-                        ✦ Pembayaran Aman
+                        Material Premium <span class="mx-1.5 text-pink-soft" aria-hidden="true">·</span>
+                        Gratis Ongkir <span class="mx-1.5 text-pink-soft" aria-hidden="true">·</span>
+                        Pembayaran Aman
                     </p>
                 </div>
 
