@@ -16,9 +16,10 @@
             $hasActiveFilters = filled($shopQ) || filled($activeSlug) || $sort !== 'newest';
             $resetUrl = route('shop.index');
         @endphp
-    {{-- Mobile filter sheet styles live in resources/css/app.css (Tailwind v4 @utility classes:
-         shop-sheet / shop-sheet-open / shop-backdrop / shop-backdrop-open) — plain CSS, no build-time
-         Blade scanning required, and transitions honor prefers-reduced-motion. --}}
+    {{-- Mobile filter sheet styles live in resources/css/app.css (plain CSS keyed to
+         #shop-filtersheet / #shop-filtersheet-backdrop + .is-open state toggled by the
+         script at the bottom of this page). Transitions honor prefers-reduced-motion;
+         the sheet is display:none from lg upward. --}}
 
     <div class="bg-white border-b border-line">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
