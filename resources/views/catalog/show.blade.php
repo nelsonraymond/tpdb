@@ -111,9 +111,10 @@
                     </div>
                 @endif
 
-                {{-- Price (base; final variant price shown live via JS from real additional_price data) --}}
+                {{-- Price (base; final variant price shown live via JS from real additional_price data).
+                     id="pd-price" lets the script swap in the selected variant's real finalPrice(). --}}
                 <div class="mt-5">
-                    <x-price-display :price="(float) $product->base_price" :compare-at="(float) $product->compare_at_price" size="lg" />
+                    <span id="pd-price"><x-price-display :price="(float) $product->base_price" :compare-at="(float) $product->compare_at_price" size="lg" /></span>
                     @if ($product->compare_at_price && $product->compare_at_price > $product->base_price)
                         @php $discountPct = round((1 - $product->base_price / $product->compare_at_price) * 100); @endphp
                         <span class="ml-2 text-[11px] font-semibold text-pink-deep align-middle">Hemat {{ $discountPct }}%</span>
@@ -121,12 +122,12 @@
                     <p class="text-[11px] text-muted mt-1" id="pd-variant-price-note">Harga dapat berbeda per varian.</p>
                 </div>
 
-                {{-- Stock availability --}}
-                <div class="mt-4 flex items-center gap-2 text-xs">
+                {{-- Stock availability — updates per selected variant via JS (data-stock is real DB data) --}}
+                <div class="mt-4 flex items-center gap-2 text-xs" id="pd-stock-row">
                     @if ($totalStock > 0)
                         <span class="inline-flex items-center gap-1.5 text-emerald-700">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            Stok Tersedia — {{ $totalStock }} pcs siap kirim
+                            <span id="pd-stock-text">Stok Tersedia — {{ $totalStock }} pcs siap kirim</span>
                         </span>
                     @else
                         <span class="inline-flex items-center gap-1.5 text-muted">
@@ -157,7 +158,7 @@
 
                     <label class="relative rounded-xl border p-3 text-left transition min-h-[44px]
                         {{ $sellable
-                            ? 'cursor-pointer border-line hover:border-pink-deep has-[:checked]:border-pink-deep has-[:checked]:bg-pink-soft/25'
+                            ? 'cursor-pointer border-line hover:border-pink-deep has-[:checked]:border-pink-deep has-[:checked]:bg-pink-soft/25 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-pink-deep'
                             : 'opacity-45 cursor-not-allowed border-line' }}">
 
                         <input type="radio"
@@ -166,6 +167,7 @@
                             class="sr-only pd-variant-radio"
                             data-final-price="{{ (int) round($variant->finalPrice()) }}"
                             data-stock="{{ (int) $variant->stock_qty }}"
+                            data-name="{{ $variant->name }}"
                             {{ $index === 0 && $sellable ? 'checked' : '' }}
                             {{ $sellable ? '' : 'disabled' }}>
 
@@ -200,7 +202,7 @@
         <div class="flex items-center gap-4">
             <div class="flex items-center border border-line rounded-xl overflow-hidden bg-white">
                 <button type="button"
-                    class="pd-qty-btn w-11 h-11 text-ink hover:bg-cream text-base"
+                    class="pd-qty-btn w-11 h-11 text-ink hover:bg-cream text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-pink-deep transition"
                     data-action="dec"
                     aria-label="Kurangi kuantitas">−</button>
 
@@ -210,22 +212,22 @@
                     value="1"
                     min="1"
                     max="{{ max(1, $product->variants->where('is_active', true)->max('stock_qty')) }}"
-                    class="w-14 h-11 text-center text-sm text-ink border-x border-line focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
+                    class="w-14 h-11 text-center text-sm text-ink border-x border-line focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-pink-deep [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
 
                 <button type="button"
-                    class="pd-qty-btn w-11 h-11 text-ink hover:bg-cream text-base"
+                    class="pd-qty-btn w-11 h-11 text-ink hover:bg-cream text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-pink-deep transition"
                     data-action="inc"
                     aria-label="Tambah kuantitas">+</button>
             </div>
 
-            <p class="text-[11px] text-muted">
+            <p class="text-[11px] text-muted" id="pd-qty-hint" aria-live="polite">
                 Maksimum sesuai stok varian terpilih.
             </p>
         </div>
 
         {{-- Cart button only: no nested Wishlist form --}}
         <div class="pt-1">
-            <x-primary-button class="w-full sm:w-auto sm:min-w-[220px]">
+            <x-primary-button class="w-full sm:w-auto sm:min-w-[220px]" id="pd-add-btn">
                 Tambah ke Keranjang
             </x-primary-button>
         </div>
@@ -382,8 +384,10 @@
         @endif
     </main>
 
-    {{-- Gallery + variant-price interaction — progressive enhancement over server-rendered defaults.
-         Uses only data already present in the HTML (data-src, data-final-price, data-stock). --}}
+    {{-- Gallery + variant interaction — progressive enhancement over server-rendered defaults.
+         Uses only data already present in the HTML (data-src, data-final-price, data-stock,
+         data-name). Server-side validation (CartService) remains the source of truth; this
+         layer keeps price/stock/qty UI in sync with the selected variant for clarity. --}}
     <script>
         (function () {
             var main = document.getElementById('pd-main-image');
@@ -400,15 +404,60 @@
                 });
             });
 
+            var priceEl = document.getElementById('pd-price');
             var note = document.getElementById('pd-variant-price-note');
+            var stockText = document.getElementById('pd-stock-text');
+            var qtyHint = document.getElementById('pd-qty-hint');
+            var addBtn = document.getElementById('pd-add-btn');
             var qty = document.getElementById('pd-quantity');
+            var compareAt = {{ (int) round($product->compare_at_price ?? 0) }};
+            var basePrice = {{ (int) round($product->base_price) }};
             function fmt(n) { return 'Rp' + Number(n).toLocaleString('id-ID'); }
+
+            function renderPrice(price) {
+                if (!priceEl) return;
+                var html = '<span class="text-lg font-semibold text-ink whitespace-nowrap">' + fmt(price) + '</span>';
+                if (compareAt > price) {
+                    html += ' <span class="text-sm text-muted line-through whitespace-nowrap">' + fmt(compareAt) + '</span>';
+                }
+                priceEl.innerHTML = html;
+            }
+
+            function syncVariant(radio) {
+                var price = parseInt(radio.getAttribute('data-final-price'), 10) || basePrice;
+                var stock = Math.max(1, parseInt(radio.getAttribute('data-stock'), 10) || 1);
+                var name = radio.getAttribute('data-name') || '';
+
+                renderPrice(price);
+                if (note) note.textContent = 'Harga varian "' + name + '": ' + fmt(price) + '.';
+                if (qty) {
+                    qty.max = stock;
+                    if ((parseInt(qty.value, 10) || 1) > stock) qty.value = stock;
+                }
+                if (qtyHint) qtyHint.textContent = 'Maks. ' + stock + ' pcs untuk varian ini.';
+                if (stockText) stockText.textContent = 'Stok varian ini: ' + stock + ' pcs';
+                if (addBtn) {
+                    addBtn.disabled = false;
+                    addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
             document.querySelectorAll('.pd-variant-radio').forEach(function (radio) {
-                radio.addEventListener('change', function () {
-                    if (note) note.textContent = 'Harga varian ini: ' + fmt(radio.getAttribute('data-final-price')) + '.';
-                    if (qty) qty.max = Math.max(1, parseInt(radio.getAttribute('data-stock'), 10) || 1);
-                });
+                radio.addEventListener('change', function () { syncVariant(radio); });
             });
+
+            // Initialize display from the server-checked default variant (if any)
+            var initial = document.querySelector('.pd-variant-radio:checked');
+            if (initial) syncVariant(initial);
+
+            // Clamp manual typing to [1, max] on blur
+            if (qty) {
+                qty.addEventListener('blur', function () {
+                    var v = parseInt(qty.value, 10);
+                    var max = parseInt(qty.max, 10) || 1;
+                    qty.value = isNaN(v) ? 1 : Math.min(max, Math.max(1, v));
+                });
+            }
 
             document.querySelectorAll('.pd-qty-btn').forEach(function (btn) {
                 btn.addEventListener('click', function () {
