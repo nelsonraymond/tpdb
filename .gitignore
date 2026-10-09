@@ -1,1 +1,5 @@
-vendor/
+# Environment files
+.env
+
+# Compressed archives
+*.zip

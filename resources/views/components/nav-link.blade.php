@@ -1,4 +1,4 @@
-@props(['active' => false, 'label' => null])
+@props(["href" => "#", "active" => false, "label" => null])
 
 {{-- Desktop nav link — DESIGN.md §12: active = deep pink text + small underline --}}
 <a href="{{ $href }}" {{ $attributes->except('href') }}

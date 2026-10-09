@@ -105,6 +105,31 @@ class CatalogController extends Controller
         $reviewCount = $product->reviews->count();
         $totalStock = (int) $product->variants->sum('stock_qty');
 
-        return view('catalog.show', compact('product', 'averageRating', 'reviewCount', 'totalStock'));
+        // Related products — real records only: active products in the same category, excluding this one.
+        $relatedProducts = Product::query()
+            ->active()
+            ->where('category_id', $product->category_id)
+            ->whereKeyNot($product->getKey())
+            ->with([
+                'category',
+                'images' => function ($q) {
+                    $q->orderByDesc('is_primary')->orderBy('sort_order');
+                },
+                'variants' => function ($q) {
+                    $q->active();
+                },
+            ])
+            ->latest()
+            ->take(4)
+            ->get();
+
+        // Wishlist state for the current customer (existing wishlist data; presentation-level read).
+        $wishlistedIds = auth()->check()
+            ? auth()->user()->wishlists()->pluck('product_id')->all()
+            : [];
+
+        return view('catalog.show', compact(
+            'product', 'averageRating', 'reviewCount', 'totalStock', 'relatedProducts', 'wishlistedIds'
+        ));
     }
 }
