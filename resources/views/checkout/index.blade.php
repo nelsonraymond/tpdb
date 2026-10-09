@@ -1,58 +1,35 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-layouts.app>
+    @section('title', 'Checkout Pesanan — Mutya Store')
 
-    <title>Checkout & Pembayaran - Mutya Store</title>
+    {{-- Tahap 4: migrated to shared app layout; per-field errors surfaced; shipping card gets
+         selected state + keyboard focus ring; fake "Diskon Voucher - Rp 0" row removed (checkout
+         backend has no voucher input); payment info honest (post-order simulated gateway).
+         Contract unchanged: POST checkout.store with address_id, shipping_method, customer_note. --}}
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 pb-28 lg:pb-12">
 
-    @vite(['resources/css/app.css'])
+        {{-- Breadcrumb --}}
+        <nav aria-label="Breadcrumb" class="text-xs text-muted mb-6">
+            <ol class="flex items-center gap-1.5 flex-wrap">
+                <li><a href="{{ route('home') }}" class="hover:text-pink-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep rounded transition">Beranda</a></li>
+                <li aria-hidden="true">/</li>
+                <li><a href="{{ route('cart.index') }}" class="hover:text-pink-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep rounded transition">Keranjang</a></li>
+                <li aria-hidden="true">/</li>
+                <li aria-current="page" class="text-ink font-medium">Checkout</li>
+            </ol>
+        </nav>
 
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #FFF9F5;
-            color: #3A3033;
-        }
-        .font-serif-display {
-            font-family: 'Playfair Display', serif;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col bg-[#FFF9F5]">
-    <!-- Navbar -->
-    <header class="bg-white border-b border-[#EBDDE2] sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="inline-flex items-center space-x-2">
-                <span class="text-[#D98FAF] text-lg">❀</span>
-                <span class="font-serif-display text-xl font-bold tracking-wider text-[#3A3033] uppercase">MUTYA</span>
-            </a>
-
-            <div class="flex items-center space-x-4 text-sm">
-                <a href="{{ route('cart.index') }}" class="text-[#75686D] hover:text-[#3A3033] text-xs font-medium">
-                    ← Kembali ke Keranjang
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
-        <!-- Page Title -->
         <div class="mb-8">
-            <h1 class="font-serif-display text-2xl sm:text-3xl font-bold text-[#3A3033]">Checkout Pesanan</h1>
-            <p class="text-xs sm:text-sm text-[#75686D] mt-1">Periksa alamat pengiriman, metode kurir, dan rincian hijab pilihan Anda.</p>
+            <h1 class="font-display text-2xl sm:text-3xl font-bold text-ink">Checkout Pesanan</h1>
+            <p class="text-sm text-muted mt-1.5">Periksa alamat pengiriman, metode kurir, dan rincian hijab pilihan Anda.</p>
         </div>
 
-        @if($errors->any())
-            <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm space-y-1">
+        {{-- General + field errors (address_id, shipping_method, cart) --}}
+        @if ($errors->any())
+            <div role="alert" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm space-y-1">
                 <p class="font-semibold text-rose-900">Periksa kesalahan sebelum melanjutkan:</p>
-                <ul class="list-disc list-inside text-xs">
-                    @foreach($errors->all() as $error)
+                <ul class="list-disc list-inside text-xs space-y-1">
+                    @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
@@ -62,260 +39,305 @@
         <form id="checkout-form" method="POST" action="{{ route('checkout.store') }}">
             @csrf
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                <!-- Left Section: Forms & Order Items -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+                <!-- ============ LEFT: STEPS & ITEMS ============ -->
                 <div class="lg:col-span-8 space-y-6">
 
-                    <!-- 1. Shipping Address Section -->
-                    <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs">
-                        <div class="flex items-center justify-between pb-4 border-b border-[#EBDDE2] mb-5">
-                            <div class="flex items-center space-x-2.5">
-                                <span class="w-7 h-7 rounded-full bg-[#D98FAF]/15 text-[#D98FAF] flex items-center justify-center text-xs font-bold">1</span>
-                                <h2 class="font-semibold text-base text-[#3A3033]">Alamat Pengiriman</h2>
+                    <!-- 1. Shipping Address -->
+                    <section class="bg-white rounded-2xl border border-line p-5 sm:p-6 shadow-card" aria-labelledby="co-address-h">
+                        <div class="flex items-center justify-between pb-4 border-b border-line mb-5 gap-3 flex-wrap">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-7 h-7 rounded-full bg-pink-deep/15 text-pink-deep flex items-center justify-center text-xs font-bold" aria-hidden="true">1</span>
+                                <h2 id="co-address-h" class="font-semibold text-base text-ink">Alamat Pengiriman</h2>
                             </div>
                             <a href="{{ route('addresses.create', ['redirect_to' => route('checkout.index')]) }}"
-                                class="text-xs text-[#D98FAF] hover:text-[#c97e9e] font-medium flex items-center">
+                                class="inline-flex items-center h-9 px-3 text-xs text-pink-deep hover:text-pink-mauve font-medium rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep">
                                 + Tambah Alamat Baru
                             </a>
                         </div>
 
-                        @if($addresses->isEmpty())
-                            <div class="p-6 rounded-xl bg-[#FFF9F5] border border-dashed border-[#D98FAF]/50 text-center">
-                                <p class="text-sm font-medium text-[#3A3033] mb-1">Anda belum memiliki alamat pengiriman tersimpan</p>
-                                <p class="text-xs text-[#75686D] mb-4">Mohon tambahkan alamat pengiriman terlebih dahulu untuk melanjutkan proses pesanan.</p>
+                        @if ($addresses->isEmpty())
+                            <div class="p-6 rounded-xl bg-cream border border-dashed border-pink-deep/50 text-center">
+                                <p class="text-sm font-medium text-ink mb-1">Anda belum memiliki alamat pengiriman tersimpan</p>
+                                <p class="text-sm text-muted mb-4">Mohon tambahkan alamat pengiriman terlebih dahulu untuk melanjutkan proses pesanan.</p>
                                 <a href="{{ route('addresses.create', ['redirect_to' => route('checkout.index')]) }}"
-                                    class="inline-flex items-center px-4 py-2 bg-[#D98FAF] hover:bg-[#c97e9e] text-white text-xs font-medium rounded-xl transition">
+                                    class="inline-flex items-center justify-center px-4 h-11 bg-pink-deep hover:bg-pink-mauve text-white text-sm font-medium rounded-xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-pink-deep">
                                     + Tambah Alamat Sekarang
                                 </a>
                             </div>
                         @else
-                            <div class="space-y-3">
-                                @foreach($addresses as $addr)
-                                    <label class="block p-4 rounded-xl border {{ old('address_id', $defaultAddress?->id) == $addr->id ? 'border-[#D98FAF] bg-[#FFF9F5]/40 ring-1 ring-[#D98FAF]/30' : 'border-[#EBDDE2] bg-white' }} cursor-pointer hover:border-[#D98FAF]/70 transition">
-                                        <div class="flex items-start space-x-3">
-                                            <input type="radio" name="address_id" value="{{ $addr->id }}"
-                                                {{ old('address_id', $defaultAddress?->id) == $addr->id ? 'checked' : '' }}
-                                                class="mt-1 text-[#D98FAF] focus:ring-[#D98FAF] border-[#EBDDE2]">
-                                            <div class="flex-1 text-xs">
-                                                <div class="flex items-center space-x-2 mb-1">
-                                                    <span class="font-semibold text-sm text-[#3A3033]">{{ $addr->recipient_name }}</span>
-                                                    <span class="text-[#75686D] font-mono">({{ $addr->phone }})</span>
-                                                    @if($addr->label)
-                                                        <span class="px-2 py-0.5 rounded-full text-[10px] bg-stone-100 text-[#75686D]">{{ $addr->label }}</span>
-                                                    @endif
-                                                    @if($addr->is_default)
-                                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#D98FAF]/15 text-[#D98FAF]">Utama</span>
+                            <fieldset>
+                                <legend class="sr-only">Pilih alamat pengiriman</legend>
+                                <div class="space-y-3">
+                                    @foreach ($addresses as $addr)
+                                        @php $addrChecked = old('address_id', $defaultAddress?->id) == $addr->id; @endphp
+                                        <label class="block p-4 rounded-xl border cursor-pointer transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-pink-deep {{ $addrChecked ? 'border-pink-deep bg-cream/60 ring-1 ring-pink-deep/30' : 'border-line bg-white hover:border-pink-deep/70' }}">
+                                            <div class="flex items-start gap-3">
+                                                <input type="radio" name="address_id" value="{{ $addr->id }}"
+                                                    {{ $addrChecked ? 'checked' : '' }}
+                                                    class="mt-1 w-4 h-4 accent-pink-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep shrink-0">
+                                                <div class="flex-1 min-w-0 text-sm">
+                                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1">
+                                                        <span class="font-semibold text-ink">{{ $addr->recipient_name }}</span>
+                                                        <span class="text-muted text-xs">{{ $addr->phone }}</span>
+                                                        @if ($addr->label)
+                                                            <span class="px-2 py-0.5 rounded-full text-[10px] bg-stone-100 text-muted">{{ $addr->label }}</span>
+                                                        @endif
+                                                        @if ($addr->is_default)
+                                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-pink-deep/15 text-pink-deep">Utama</span>
+                                                        @endif
+                                                    </div>
+                                                    <p class="text-ink leading-relaxed text-sm">{{ $addr->fullAddress() }}</p>
+                                                    @if ($addr->notes)
+                                                        <p class="text-xs text-muted italic mt-1">Patokan: {{ $addr->notes }}</p>
                                                     @endif
                                                 </div>
-                                                <p class="text-[#3A3033] leading-relaxed">{{ $addr->fullAddress() }}</p>
-                                                @if($addr->notes)
-                                                    <p class="text-[11px] text-[#75686D] italic mt-1">Patokan: {{ $addr->notes }}</p>
-                                                @endif
                                             </div>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                @error('address_id')
+                                    <p class="text-xs text-rose-600 mt-2" role="alert">{{ $message }}</p>
+                                @enderror
+                            </fieldset>
+                        @endif
+                    </section>
+
+                    <!-- 2. Shipping Method -->
+                    <section class="bg-white rounded-2xl border border-line p-5 sm:p-6 shadow-card" aria-labelledby="co-shipping-h">
+                        <div class="flex items-center gap-2.5 pb-4 border-b border-line mb-5">
+                            <span class="w-7 h-7 rounded-full bg-pink-deep/15 text-pink-deep flex items-center justify-center text-xs font-bold" aria-hidden="true">2</span>
+                            <h2 id="co-shipping-h" class="font-semibold text-base text-ink">Metode Pengiriman</h2>
+                        </div>
+
+                        <fieldset>
+                            <legend class="sr-only">Pilih metode pengiriman</legend>
+                            <div class="space-y-3">
+                                @foreach ($shippingMethods as $method)
+                                    @php $shipChecked = old('shipping_method', $defaultShipping) === $method['code']; @endphp
+                                    <label class="block p-4 rounded-xl border cursor-pointer transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-pink-deep {{ $shipChecked ? 'border-pink-deep bg-cream/60 ring-1 ring-pink-deep/30' : 'border-line bg-white hover:border-pink-deep/70' }}">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <div class="flex items-start gap-3 min-w-0">
+                                                <input type="radio" name="shipping_method" value="{{ $method['code'] }}"
+                                                    data-cost="{{ $method['cost'] }}"
+                                                    {{ $shipChecked ? 'checked' : '' }}
+                                                    class="shipping-method-radio mt-1 w-4 h-4 accent-pink-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep shrink-0">
+                                                <div class="min-w-0">
+                                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                                        <span class="font-semibold text-sm text-ink">{{ $method['courier'] }} — {{ $method['name'] }}</span>
+                                                        <span class="px-2 py-0.5 rounded-full text-[10px] bg-cream border border-line text-muted">
+                                                            {{ $method['estimated_days'] }}
+                                                        </span>
+                                                    </div>
+                                                    <p class="text-xs text-muted mt-0.5">{{ $method['description'] }}</p>
+                                                </div>
+                                            </div>
+                                            <span class="font-semibold text-sm text-ink shrink-0">
+                                                Rp{{ number_format($method['cost'], 0, ',', '.') }}
+                                            </span>
                                         </div>
                                     </label>
                                 @endforeach
                             </div>
-                        @endif
-                    </div>
+                            @error('shipping_method')
+                                <p class="text-xs text-rose-600 mt-2" role="alert">{{ $message }}</p>
+                            @enderror
+                        </fieldset>
+                    </section>
 
-                    <!-- 2. Shipping Method Section -->
-                    <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs">
-                        <div class="flex items-center space-x-2.5 pb-4 border-b border-[#EBDDE2] mb-5">
-                            <span class="w-7 h-7 rounded-full bg-[#D98FAF]/15 text-[#D98FAF] flex items-center justify-center text-xs font-bold">2</span>
-                            <h2 class="font-semibold text-base text-[#3A3033]">Metode Pengiriman</h2>
+                    <!-- 3. Customer Note -->
+                    <section class="bg-white rounded-2xl border border-line p-5 sm:p-6 shadow-card" aria-labelledby="co-note-h">
+                        <div class="flex items-center gap-2.5 pb-4 border-b border-line mb-4">
+                            <span class="w-7 h-7 rounded-full bg-pink-deep/15 text-pink-deep flex items-center justify-center text-xs font-bold" aria-hidden="true">3</span>
+                            <h2 id="co-note-h" class="font-semibold text-base text-ink">Catatan Pesanan <span class="font-normal text-muted text-sm">(Opsional)</span></h2>
                         </div>
 
-                        <div class="space-y-3">
-                            @foreach($shippingMethods as $method)
-                                <label class="block p-4 rounded-xl border border-[#EBDDE2] hover:border-[#D98FAF]/70 cursor-pointer transition">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-3">
-                                            <input type="radio" name="shipping_method" value="{{ $method['code'] }}"
-                                                data-cost="{{ $method['cost'] }}"
-                                                {{ old('shipping_method', $defaultShipping) === $method['code'] ? 'checked' : '' }}
-                                                class="shipping-method-radio text-[#D98FAF] focus:ring-[#D98FAF] border-[#EBDDE2]">
-                                            <div>
-                                                <div class="flex items-center space-x-2">
-                                                    <span class="font-semibold text-sm text-[#3A3033]">{{ $method['courier'] }} - {{ $method['name'] }}</span>
-                                                    <span class="px-2 py-0.5 rounded-full text-[10px] bg-[#FFF9F5] border border-[#EBDDE2] text-[#75686D]">
-                                                        {{ $method['estimated_days'] }}
-                                                    </span>
-                                                </div>
-                                                <p class="text-xs text-[#75686D] mt-0.5">{{ $method['description'] }}</p>
-                                            </div>
-                                        </div>
-                                        <span class="font-semibold text-sm text-[#3A3033]">
-                                            Rp {{ number_format($method['cost'], 0, ',', '.') }}
-                                        </span>
-                                    </div>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
+                        <label for="customer_note" class="sr-only">Catatan untuk pesanan</label>
+                        <textarea name="customer_note" id="customer_note" rows="3" maxlength="500"
+                            placeholder="Tambahkan instruksi khusus untuk pesanan atau kurir (maks. 500 karakter)..."
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-line bg-cream/40 text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-pink-deep focus-visible:ring-2 focus-visible:ring-pink-deep transition {{ $errors->has('customer_note') ? 'border-rose-300' : '' }}">{{ old('customer_note') }}</textarea>
+                        @error('customer_note')
+                            <p class="text-xs text-rose-600 mt-1.5" role="alert">{{ $message }}</p>
+                        @enderror
+                    </section>
 
-                    <!-- 3. Customer Note Section -->
-                    <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs">
-                        <div class="flex items-center space-x-2.5 pb-4 border-b border-[#EBDDE2] mb-4">
-                            <span class="w-7 h-7 rounded-full bg-[#D98FAF]/15 text-[#D98FAF] flex items-center justify-center text-xs font-bold">3</span>
-                            <h2 class="font-semibold text-base text-[#3A3033]">Catatan Pesanan (Opsional)</h2>
+                    <!-- 4. Order Items Review -->
+                    <section class="bg-white rounded-2xl border border-line p-5 sm:p-6 shadow-card" aria-labelledby="co-items-h">
+                        <div class="flex items-center justify-between pb-4 border-b border-line mb-4 gap-3 flex-wrap">
+                            <h2 id="co-items-h" class="font-semibold text-base text-ink">Produk yang Dipesan ({{ $itemCount }} item)</h2>
+                            <a href="{{ route('cart.index') }}" class="inline-flex items-center h-9 px-3 text-xs text-pink-deep hover:text-pink-mauve font-medium rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep">Ubah Keranjang</a>
                         </div>
 
-                        <div>
-                            <textarea name="customer_note" id="customer_note" rows="2"
-                                placeholder="Tambahkan instruksi khusus untuk pesanan atau kurir (opsional)..."
-                                class="w-full px-3.5 py-2.5 rounded-xl border border-[#EBDDE2] bg-[#FFF9F5]/40 text-sm focus:outline-none focus:border-[#D98FAF] focus:ring-1 focus:ring-[#D98FAF]">{{ old('customer_note') }}</textarea>
-                        </div>
-                    </div>
-
-                    <!-- 4. Order Items Review Section -->
-                    <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs">
-                        <div class="flex items-center justify-between pb-4 border-b border-[#EBDDE2] mb-4">
-                            <h2 class="font-semibold text-base text-[#3A3033]">Produk yang Dipesan ({{ $itemCount }} item)</h2>
-                            <a href="{{ route('cart.index') }}" class="text-xs text-[#D98FAF] hover:text-[#c97e9e] font-medium">Ubah Keranjang</a>
-                        </div>
-
-                        <div class="divide-y divide-[#EBDDE2]">
-                            @foreach($cartItems as $item)
+                        <ul class="divide-y divide-line list-none m-0 p-0">
+                            @foreach ($cartItems as $item)
                                 @php
                                     $variant = $item->variant;
                                     $product = $variant->product;
                                     $primaryImage = $product->primaryImage();
                                 @endphp
-                                <div class="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-14 h-14 rounded-xl bg-[#FFF9F5] border border-[#EBDDE2] overflow-hidden shrink-0 flex items-center justify-center">
-                                            @if($primaryImage)
-                                                <img src="{{ asset('storage/' . $primaryImage->image_path) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                <li class="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="w-14 h-14 rounded-xl bg-cream border border-line overflow-hidden shrink-0 flex items-center justify-center">
+                                            @if ($primaryImage)
+                                                <img src="{{ Storage::url($primaryImage->image_path) }}" alt="{{ $product->name }}"
+                                                    loading="lazy" class="w-full h-full object-cover">
                                             @else
-                                                <span class="text-xl text-[#D98FAF]">❀</span>
+                                                <span class="text-[10px] tracking-widest text-pink-deep uppercase" aria-hidden="true">Mutya</span>
                                             @endif
                                         </div>
-                                        <div>
-                                            <h3 class="font-medium text-sm text-[#3A3033]">{{ $product->name }}</h3>
-                                            <div class="flex items-center space-x-2 text-xs text-[#75686D] mt-0.5">
-                                                <span>Varian: <strong class="text-[#3A3033]">{{ $variant->name }}</strong></span>
-                                                <span>•</span>
-                                                <span class="font-mono text-[11px]">{{ $variant->sku }}</span>
+                                        <div class="min-w-0">
+                                            <h3 class="font-medium text-sm text-ink line-clamp-2">{{ $product->name }}</h3>
+                                            <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted mt-0.5">
+                                                <span>Varian: <strong class="text-ink font-medium">{{ $variant->name }}</strong></span>
+                                                <span aria-hidden="true">•</span>
+                                                <span class="text-[11px]">{{ $variant->sku }}</span>
                                             </div>
-                                            <p class="text-xs text-[#75686D] mt-0.5">
-                                                {{ $item->quantity }} x Rp {{ number_format($variant->finalPrice(), 0, ',', '.') }}
+                                            <p class="text-xs text-muted mt-0.5">
+                                                {{ $item->quantity }} × Rp{{ number_format($variant->finalPrice(), 0, ',', '.') }}
                                             </p>
                                         </div>
                                     </div>
                                     <div class="text-right shrink-0">
-                                        <span class="font-semibold text-sm text-[#3A3033]">
-                                            Rp {{ number_format($variant->finalPrice() * $item->quantity, 0, ',', '.') }}
+                                        <span class="font-semibold text-sm text-ink">
+                                            Rp{{ number_format($variant->finalPrice() * $item->quantity, 0, ',', '.') }}
                                         </span>
                                     </div>
-                                </div>
+                                </li>
                             @endforeach
-                        </div>
-                    </div>
+                        </ul>
+                    </section>
                 </div>
 
-                <!-- Right Section: Sticky Summary & Confirmation -->
-                <div class="lg:col-span-4">
-                    <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs sticky top-24 space-y-5">
-                        <h2 class="font-serif-display text-lg font-bold text-[#3A3033] pb-3 border-b border-[#EBDDE2]">
-                            Ringkasan Pembayaran
-                        </h2>
+                <!-- ============ RIGHT: SUMMARY ============ -->
+                <aside class="lg:col-span-4" aria-label="Ringkasan pembayaran">
+                    <div class="bg-white rounded-2xl border border-line p-6 shadow-card space-y-5 lg:sticky lg:top-24">
+                        <h2 class="font-display text-lg font-bold text-ink pb-3 border-b border-line">Ringkasan Pembayaran</h2>
 
                         <div class="space-y-3 text-sm">
-                            <div class="flex justify-between text-[#75686D]">
+                            <div class="flex justify-between text-muted">
                                 <span>Subtotal Produk</span>
-                                <span class="font-medium text-[#3A3033]">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
+                                <span class="font-medium text-ink">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
                             </div>
 
-                            <div class="flex justify-between text-[#75686D]">
+                            <div class="flex justify-between text-muted">
                                 <span>Biaya Pengiriman</span>
-                                <span id="summary-shipping" class="font-medium text-[#3A3033]">
-                                    Rp {{ number_format($shippingCost, 0, ',', '.') }}
-                                </span>
+                                <span id="summary-shipping" class="font-medium text-ink">Rp{{ number_format($shippingCost, 0, ',', '.') }}</span>
                             </div>
 
-                            <div class="flex justify-between text-[#75686D]">
-                                <span>Diskon Voucher</span>
-                                <span class="font-medium text-emerald-600">- Rp 0</span>
-                            </div>
-
-                            <div class="pt-3 border-t border-[#EBDDE2] flex justify-between items-baseline">
-                                <span class="font-semibold text-base text-[#3A3033]">Total Pembayaran</span>
+                            <div class="pt-3 border-t border-line flex justify-between items-baseline">
+                                <span class="font-semibold text-base text-ink">Total Pembayaran</span>
                                 <div class="text-right">
-                                    <span id="summary-grand-total" class="font-serif-display text-xl font-bold text-[#D98FAF]">
-                                        Rp {{ number_format($grandTotal, 0, ',', '.') }}
+                                    <span id="summary-grand-total" class="font-display text-xl font-bold text-pink-deep">
+                                        Rp{{ number_format($grandTotal, 0, ',', '.') }}
                                     </span>
+                                    <p id="summary-note" class="text-[11px] text-muted mt-0.5">Sesuai perhitungan server.</p>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Confirmation Button -->
-                        <div class="pt-2">
+                        <div class="pt-1">
                             <button type="submit"
                                 {{ $addresses->isEmpty() ? 'disabled' : '' }}
-                                class="w-full py-3.5 px-4 bg-[#D98FAF] hover:bg-[#c97e9e] disabled:bg-stone-300 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-xl shadow-xs transition flex items-center justify-center space-x-2">
-                                <span>Konfirmasi & Buat Pesanan</span>
-                                <span>→</span>
+                                class="w-full py-3.5 px-4 bg-pink-deep hover:bg-pink-mauve disabled:bg-stone-300 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-xl shadow-card transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-pink-deep">
+                                Konfirmasi &amp; Buat Pesanan
                             </button>
-                            @if($addresses->isEmpty())
-                                <p class="text-[11px] text-rose-500 text-center mt-2">
+                            @if ($addresses->isEmpty())
+                                <p class="text-xs text-rose-600 text-center mt-2" role="note">
                                     Tambahkan alamat pengiriman terlebih dahulu untuk konfirmasi pesanan.
                                 </p>
                             @endif
                         </div>
 
+                        <!-- Payment info: honest — no payment option is collected at checkout;
+                             payment is completed afterwards via the order's payment page. -->
+                        <div class="pt-4 border-t border-line">
+                            <h3 class="text-xs font-semibold uppercase tracking-wide text-muted mb-2">Informasi Pembayaran</h3>
+                            <p class="text-xs text-muted leading-relaxed">
+                                Setelah pesanan dibuat, Anda dapat melanjutkan ke halaman pembayaran
+                                untuk menyelesaikan transaksi pesanan ini.
+                            </p>
+                        </div>
+
                         <!-- Trust Features -->
-                        <div class="pt-4 border-t border-[#EBDDE2] space-y-2 text-[11px] text-[#75686D]">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-emerald-500 font-bold">✓</span>
-                                <span>Stok produk terkunci otomatis saat pemesanan</span>
+                        <div class="pt-4 border-t border-line space-y-2 text-xs text-muted">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                <span>Stok produk dikunci otomatis saat pemesanan</span>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-emerald-500 font-bold">✓</span>
-                                <span>Rincian produk & harga snapshot permanen</span>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                <span>Rincian produk &amp; harga tersimpan permanen (snapshot)</span>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-emerald-500 font-bold">✓</span>
-                                <span>Perhitungan harga & stok diverifikasi server-side</span>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                <span>Perhitungan harga &amp; stok diverifikasi server-side</span>
                             </div>
                         </div>
                     </div>
-                </div>
+                </aside>
             </div>
         </form>
-    </main>
 
-    <footer class="mt-auto bg-white border-t border-[#EBDDE2] py-6 text-center text-xs text-[#75686D]">
-        <p>&copy; {{ date('Y') }} Mutya Store. Soft Luxury Hijab Boutique.</p>
-    </footer>
+        {{-- Sticky summary bar (mobile/tablet): total always reachable --}}
+        <div class="fixed bottom-0 inset-x-0 z-50 lg:hidden bg-white border-t border-line shadow-[0_-4px_16px_rgba(58,48,51,0.08)]">
+            <div class="px-4 py-3 flex items-center justify-between gap-4 max-w-7xl mx-auto">
+                <div>
+                    <p class="text-[11px] text-muted leading-tight">Total Pembayaran</p>
+                    <p id="bar-grand-total" class="text-base font-bold text-ink leading-tight font-display">Rp{{ number_format($grandTotal, 0, ',', '.') }}</p>
+                </div>
+                <button type="submit" form="checkout-form"
+                    {{ $addresses->isEmpty() ? 'disabled' : '' }}
+                    class="shrink-0 inline-flex items-center justify-center px-5 h-12 rounded-xl bg-pink-deep text-white font-medium text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-pink-deep active:bg-pink-mauve disabled:bg-stone-300 disabled:cursor-not-allowed transition">
+                    Buat Pesanan
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
+        // Visual-only preview when switching shipping method. Server remains the source of
+        // truth: CheckoutController recomputes cost from ShippingService on store().
         document.addEventListener('DOMContentLoaded', function () {
-            const subtotal = {{ $subtotal }};
-            const shippingRadios = document.querySelectorAll('.shipping-method-radio');
-            const summaryShipping = document.getElementById('summary-shipping');
-            const summaryGrandTotal = document.getElementById('summary-grand-total');
+            var subtotal = {{ (int) $subtotal }};
+            var radios = document.querySelectorAll('.shipping-method-radio');
+            var elShipping = document.getElementById('summary-shipping');
+            var elTotal = document.getElementById('summary-grand-total');
+            var elBar = document.getElementById('bar-grand-total');
 
             function formatRupiah(num) {
-                return 'Rp ' + Number(num).toLocaleString('id-ID');
+                return 'Rp' + Number(num).toLocaleString('id-ID');
             }
 
-            shippingRadios.forEach(radio => {
-                radio.addEventListener('change', function () {
-                    if (this.checked) {
-                        const cost = parseFloat(this.dataset.cost || 0);
-                        const grandTotal = subtotal + cost;
+            function refresh(cost) {
+                if (elShipping) elShipping.textContent = formatRupiah(cost);
+                var t = formatRupiah(subtotal + cost);
+                if (elTotal) elTotal.textContent = t;
+                if (elBar) elBar.textContent = t;
+            }
 
-                        if (summaryShipping) {
-                            summaryShipping.textContent = formatRupiah(cost);
-                        }
-                        if (summaryGrandTotal) {
-                            summaryGrandTotal.textContent = formatRupiah(grandTotal);
-                        }
-                    }
+            radios.forEach(function (radio) {
+                radio.addEventListener('change', function () {
+                    if (this.checked) refresh(parseFloat(this.dataset.cost || 0));
+                });
+            });
+
+            // Also toggle selected-card styling on change (pure CSS handles hover/focus).
+            radios.forEach(function (radio) {
+                radio.addEventListener('change', function () {
+                    document.querySelectorAll('label:has(.shipping-method-radio)').forEach(function (label) {
+                        var input = label.querySelector('.shipping-method-radio');
+                        if (!input) return;
+                        label.classList.toggle('border-pink-deep', input.checked);
+                        label.classList.toggle('bg-cream/60', input.checked);
+                        label.classList.toggle('ring-1', input.checked);
+                        label.classList.toggle('ring-pink-deep/30', input.checked);
+                        label.classList.toggle('border-line', !input.checked);
+                        label.classList.toggle('bg-white', !input.checked);
+                    });
                 });
             });
         });
     </script>
-</body>
-</html>
+</x-layouts.app>

@@ -1,205 +1,194 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-layouts.app>
+    @section('title', 'Keranjang Belanja — Mutya Store')
 
-    <title>Keranjang Belanja - Mutya Store</title>
+    {{-- Tahap 4: migrated to shared app layout (navbar/footer/flash), design tokens,
+         stepper qty consistent with product detail, server-side max/min enforced,
+         sticky mobile summary bar. Routes & payload names unchanged:
+         cart.items.update (PATCH, quantity) / cart.items.destroy (DELETE) / cart.destroy (DELETE). --}}
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 pb-28 lg:pb-12">
 
-    @vite(['resources/css/app.css'])
+        {{-- Breadcrumb --}}
+        <nav aria-label="Breadcrumb" class="text-xs text-muted mb-6">
+            <ol class="flex items-center gap-1.5 flex-wrap">
+                <li><a href="{{ route('home') }}" class="hover:text-pink-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep rounded transition">Beranda</a></li>
+                <li aria-hidden="true">/</li>
+                <li aria-current="page" class="text-ink font-medium">Keranjang Belanja</li>
+            </ol>
+        </nav>
 
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #FFF9F5;
-            color: #3A3033;
-        }
-        .font-serif-display {
-            font-family: 'Playfair Display', serif;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col bg-[#FFF9F5]">
-    <!-- Navbar -->
-    <header class="bg-white border-b border-[#EBDDE2] sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="inline-flex items-center space-x-2">
-                <span class="text-[#D98FAF] text-lg">❀</span>
-                <span class="font-serif-display text-xl font-bold tracking-wider text-[#3A3033] uppercase">MUTYA</span>
-            </a>
-
-            <nav class="hidden md:flex items-center space-x-6 text-sm">
-                <a href="{{ route('home') }}" class="text-[#75686D] hover:text-[#D98FAF] transition">Beranda</a>
-                <a href="{{ route('shop.index') }}" class="text-[#75686D] hover:text-[#D98FAF] transition">Koleksi Produk</a>
-            </nav>
-
-            <div class="flex items-center space-x-4 text-sm">
-                <a href="{{ route('wishlist.index') }}" class="text-[#75686D] hover:text-[#D98FAF] text-xs font-medium flex items-center">
-                    <span class="mr-1">♡</span> Wishlist
-                </a>
-                <a href="{{ route('cart.index') }}" class="text-[#D98FAF] font-semibold text-xs flex items-center">
-                    <span class="mr-1">🛒</span> Keranjang
-                    @if($cart && $cart->totalItems() > 0)
-                        <span class="ml-1 px-1.5 py-0.2 rounded-full bg-[#D98FAF] text-white text-[10px]">
-                            {{ $cart->totalItems() }}
-                        </span>
-                    @endif
-                </a>
-
-                @auth
-                    <a href="{{ route('profile') }}" class="text-[#75686D] hover:text-[#3A3033] text-xs font-medium">
-                        Akun
-                    </a>
-                @else
-                    <a href="{{ route('login') }}" class="text-[#75686D] hover:text-[#D98FAF] text-xs font-medium">
-                        Masuk
-                    </a>
-                @endauth
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div class="mb-8">
-            <h1 class="font-serif-display text-2xl sm:text-3xl font-bold text-[#3A3033]">Keranjang Belanja</h1>
-            <p class="text-xs text-[#75686D] mt-1">Periksa kembali pilihan hijab favorit Anda sebelum melanjutkan</p>
+            <h1 class="font-display text-2xl sm:text-3xl font-bold text-ink">Keranjang Belanja</h1>
+            <p class="text-sm text-muted mt-1.5">Periksa kembali pilihan hijab favorit Anda sebelum melanjutkan.</p>
         </div>
 
-        @if(session('success'))
-            <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-sm text-emerald-800 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                <span>{{ session('success') }}</span>
-            </div>
-        @endif
-
-        @if($errors->any())
-            <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-800">
+        {{-- Field-level validation errors from CartService (e.g. quantity melebihi stok) --}}
+        @if ($errors->any())
+            <div role="alert" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-sm text-rose-800">
+                <p class="font-semibold mb-1">Periksa kembali:</p>
                 <ul class="list-disc list-inside text-xs space-y-1">
-                    @foreach($errors->all() as $error)
+                    @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
             </div>
         @endif
 
-        @if(! $cart || $cart->items->isEmpty())
-            <div class="bg-white rounded-2xl border border-[#EBDDE2] p-12 text-center max-w-lg mx-auto shadow-xs">
-                <div class="w-16 h-16 rounded-full bg-pink-50 text-[#D98FAF] flex items-center justify-center mx-auto mb-4 text-2xl">
-                    🛍️
+        @if (! $cart || $cart->items->isEmpty())
+            {{-- Empty state --}}
+            <div class="bg-white rounded-2xl border border-line p-10 sm:p-12 text-center max-w-lg mx-auto shadow-card">
+                <div class="w-16 h-16 rounded-full bg-pink-soft/30 text-pink-deep flex items-center justify-center mx-auto mb-4" aria-hidden="true">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
+                    </svg>
                 </div>
-                <h2 class="font-serif-display text-xl font-bold text-[#3A3033]">Keranjang Anda Masih Kosong</h2>
-                <p class="text-xs text-[#75686D] mt-1 mb-6">Jelajahi koleksi hijab kami dan temukan pilihan anggun favorit Anda.</p>
+                <h2 class="font-display text-xl font-bold text-ink">Keranjang Anda Masih Kosong</h2>
+                <p class="text-sm text-muted mt-1.5 mb-6">Jelajahi koleksi hijab kami dan temukan pilihan anggun favorit Anda.</p>
                 <a href="{{ route('shop.index') }}"
-                    class="inline-block px-6 py-2.5 rounded-xl bg-[#D98FAF] hover:bg-[#B97897] text-white font-medium text-xs transition shadow-xs">
+                    class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-pink-deep hover:bg-pink-mauve text-white font-medium text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-pink-deep">
                     Mulai Belanja Hijab
                 </a>
             </div>
         @else
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Cart Items Table / List -->
-                <div class="lg:col-span-2 space-y-4">
-                    <div class="bg-white rounded-2xl border border-[#EBDDE2] overflow-hidden shadow-xs">
-                        <div class="p-4 bg-[#FFF9F5] border-b border-[#EBDDE2] flex justify-between items-center text-xs font-semibold text-[#75686D] uppercase">
-                            <span>Item Produk ({{ $cart->totalItems() }})</span>
-                            <form method="POST" action="{{ route('cart.destroy') }}" onsubmit="return confirm('Kosongkan keranjang belanja?')">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+
+                {{-- ================= CART ITEMS ================= --}}
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-2xl border border-line overflow-hidden shadow-card">
+                        <div class="p-4 bg-surface border-b border-line flex justify-between items-center text-xs font-semibold text-muted uppercase tracking-wide">
+                            <span>Item Produk ({{ $cart->totalItems() }} pcs)</span>
+                            <form method="POST" action="{{ route('cart.destroy') }}"
+                                onsubmit="return confirm('Kosongkan seluruh isi keranjang belanja?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-700 font-normal normal-case cursor-pointer">
+                                <button type="submit"
+                                    class="text-rose-600 hover:text-rose-700 font-normal normal-case cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 transition">
                                     Kosongkan Keranjang
                                 </button>
                             </form>
                         </div>
 
-                        <div class="divide-y divide-[#EBDDE2]">
-                            @foreach($cart->items as $item)
+                        <ul class="divide-y divide-line list-none m-0 p-0">
+                            @foreach ($cart->items as $item)
                                 @php
                                     $variant = $item->variant;
-                                    $product = $variant->product;
-                                    $img = $product->primaryImage();
+                                    $product = $variant?->product;
+                                    $img = $product?->primaryImage();
+                                    $stockMax = max(1, (int) ($variant->stock_qty ?? 1));
                                 @endphp
-                                <div class="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                                    <div class="flex items-center space-x-3.5">
-                                        @if($img)
+                                <li class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 min-w-0">
+                                    {{-- Product meta --}}
+                                    <div class="flex items-start sm:items-center gap-3.5 min-w-0">
+                                        @if ($img)
                                             <img src="{{ Storage::url($img->image_path) }}" alt="{{ $product->name }}"
-                                                class="w-16 h-20 object-cover rounded-xl border border-[#EBDDE2] bg-[#FFF9F5] shrink-0">
+                                                loading="lazy"
+                                                class="w-16 h-20 object-cover rounded-xl border border-line bg-cream shrink-0">
                                         @else
-                                            <div class="w-16 h-20 rounded-xl bg-pink-50 border border-[#EBDDE2] flex items-center justify-center text-[#D98FAF] text-[10px] shrink-0">
+                                            <div class="w-16 h-20 rounded-xl bg-pink-soft/20 border border-line flex items-center justify-center text-[10px] tracking-widest text-pink-deep uppercase shrink-0" aria-hidden="true">
                                                 Mutya
                                             </div>
                                         @endif
-                                        <div>
-                                            <span class="text-[10px] text-[#75686D] uppercase tracking-wider block">{{ $product->category->name }}</span>
-                                            <a href="{{ route('shop.product', $product->slug) }}" class="font-medium text-sm text-[#3A3033] hover:text-[#D98FAF] transition">
+                                        <div class="min-w-0">
+                                            @if ($product->category)
+                                                <span class="text-[10px] text-muted uppercase tracking-wider block">{{ $product->category->name }}</span>
+                                            @endif
+                                            <a href="{{ route('shop.product', $product->slug) }}"
+                                                class="font-medium text-sm text-ink hover:text-pink-deep transition line-clamp-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep rounded">
                                                 {{ $product->name }}
                                             </a>
-                                            <div class="flex items-center space-x-2 text-xs text-[#75686D] mt-1">
-                                                @if($variant->color_hex)
-                                                    <span class="w-3 h-3 rounded-full border border-gray-300" style="background-color: {{ $variant->color_hex }}"></span>
+                                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted mt-1.5">
+                                                @if ($variant->color_hex)
+                                                    <span class="w-3 h-3 rounded-full border border-line shrink-0" style="background-color: {{ $variant->color_hex }}" aria-hidden="true"></span>
                                                 @endif
                                                 <span>{{ $variant->name }}</span>
-                                                <span>•</span>
+                                                <span aria-hidden="true">•</span>
                                                 <span>{{ $variant->size ?? 'All Size' }}</span>
                                             </div>
-                                            <div class="text-xs font-semibold text-[#3A3033] mt-1">
+                                            <div class="text-xs font-semibold text-ink mt-1.5">
                                                 Rp{{ number_format($item->unit_price, 0, ',', '.') }}
+                                                <span class="font-normal text-muted">/ pcs</span>
                                             </div>
+                                            @if ($item->quantity >= $variant->stock_qty)
+                                                <p class="text-[11px] text-pink-mauve mt-1">Kuantitas sudah maksimum sesuai stok ({{ $variant->stock_qty }} pcs).</p>
+                                            @endif
                                         </div>
                                     </div>
 
-                                    <!-- Quantity Update & Subtotal Controls -->
-                                    <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4">
-                                        <form method="POST" action="{{ route('cart.items.update', $item) }}" class="flex items-center space-x-1.5">
+                                    {{-- Qty stepper + subtotal + delete. Each form standalone (no nesting). --}}
+                                    <div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+                                        {{-- Single standalone form; − / + are submit buttons carrying
+                                             their own quantity value, so no JS is strictly required and
+                                             there is never a form inside a form. --}}
+                                        <form method="POST" action="{{ route('cart.items.update', $item) }}"
+                                            data-cart-form
+                                            class="flex items-center gap-3 shrink-0">
                                             @csrf
                                             @method('PATCH')
-                                            <input type="number" name="quantity" value="{{ $item->quantity }}" min="1" max="{{ $variant->stock_qty }}"
-                                                class="w-16 px-2 py-1.5 border border-[#EBDDE2] rounded-xl text-center text-xs bg-[#FFF9F5]/40 focus:outline-none focus:ring-1 focus:ring-[#D98FAF]">
-                                            <button type="submit" title="Perbarui Kuantitas"
-                                                class="px-2.5 py-1.5 rounded-xl border border-[#EBDDE2] text-xs font-medium text-[#75686D] hover:bg-[#FFF9F5] transition cursor-pointer">
-                                                Ubah
-                                            </button>
+
+                                            <div class="flex items-center border border-line rounded-xl overflow-hidden bg-white shrink-0">
+                                                <button type="submit" name="quantity" value="{{ $item->quantity - 1 }}"
+                                                    {{ $item->quantity <= 1 ? 'disabled' : '' }}
+                                                    aria-label="Kurangi kuantitas {{ $product->name }}"
+                                                    class="w-11 h-11 text-ink hover:bg-cream text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-pink-deep disabled:opacity-40 disabled:cursor-not-allowed transition">−</button>
+
+                                                <label class="sr-only" for="qty-{{ $item->id }}">Kuantitas {{ $product->name }}</label>
+                                                <input type="number"
+                                                    id="qty-{{ $item->id }}"
+                                                    name="quantity"
+                                                    value="{{ $item->quantity }}"
+                                                    min="1"
+                                                    max="{{ $stockMax }}"
+                                                    step="1"
+                                                    required
+                                                    class="w-14 h-11 text-center text-sm text-ink border-x border-line bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-pink-deep [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
+
+                                                <button type="submit" name="quantity" value="{{ $item->quantity + 1 }}"
+                                                    {{ $item->quantity >= $stockMax ? 'disabled' : '' }}
+                                                    aria-label="Tambah kuantitas {{ $product->name }}"
+                                                    class="w-11 h-11 text-ink hover:bg-cream text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-pink-deep disabled:opacity-40 disabled:cursor-not-allowed transition">+</button>
+                                            </div>
                                         </form>
 
-                                        <div class="text-right">
-                                            <span class="text-xs font-bold text-[#3A3033] block">
+                                        <div class="text-right shrink-0">
+                                            <span class="text-sm font-bold text-ink block">
                                                 Rp{{ number_format($item->subtotal(), 0, ',', '.') }}
                                             </span>
-                                            <form method="POST" action="{{ route('cart.items.destroy', $item) }}" class="inline">
+                                            <form method="POST" action="{{ route('cart.items.destroy', $item) }}" class="inline mt-0.5"
+                                                onsubmit="return confirm('Hapus {{ $product->name }} ({{ $variant->name }}) dari keranjang?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-[11px] text-red-500 hover:text-red-700 cursor-pointer">
-                                                    Hapus
+                                                <button type="submit"
+                                                    class="text-[11px] text-rose-500 hover:text-rose-700 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 transition">
+                                                    Hapus item
                                                 </button>
                                             </form>
                                         </div>
                                     </div>
-                                </div>
+                                </li>
                             @endforeach
-                        </div>
+                        </ul>
                     </div>
+
+                    <a href="{{ route('shop.index') }}"
+                        class="inline-flex items-center gap-1.5 mt-4 text-sm text-muted hover:text-pink-deep transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep rounded px-1 py-0.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                        Lanjut berbelanja di katalog
+                    </a>
                 </div>
 
-                <!-- Order Summary Column -->
-                <div class="space-y-4">
-                    <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs space-y-4">
-                        <h2 class="font-serif-display text-lg font-bold text-[#3A3033] border-b border-[#EBDDE2] pb-3">
-                            Ringkasan Belanja
-                        </h2>
+                {{-- ================= SUMMARY (desktop) ================= --}}
+                <aside class="hidden lg:block lg:sticky lg:top-24 space-y-4" aria-label="Ringkasan belanja">
+                    <div class="bg-white rounded-2xl border border-line p-6 shadow-card space-y-4">
+                        <h2 class="font-display text-lg font-bold text-ink border-b border-line pb-3">Ringkasan Belanja</h2>
 
-                        <div class="space-y-2 text-xs text-[#75686D]">
+                        <div class="space-y-2 text-sm text-muted">
                             <div class="flex justify-between">
                                 <span>Total Item</span>
-                                <span class="font-medium text-[#3A3033]">{{ $cart->totalItems() }} pcs</span>
+                                <span class="font-medium text-ink">{{ $cart->totalItems() }} pcs</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Subtotal Produk</span>
-                                <span class="font-semibold text-[#3A3033]">
-                                    Rp{{ number_format($cart->subtotal(), 0, ',', '.') }}
-                                </span>
+                                <span class="font-semibold text-ink">Rp{{ number_format($cart->subtotal(), 0, ',', '.') }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Biaya Pengiriman</span>
@@ -207,26 +196,69 @@
                             </div>
                         </div>
 
-                        <div class="pt-3 border-t border-[#EBDDE2] flex justify-between items-baseline">
-                            <span class="text-sm font-bold text-[#3A3033]">Total Subtotal</span>
-                            <span class="text-xl font-bold text-[#D98FAF]">
-                                Rp{{ number_format($cart->subtotal(), 0, ',', '.') }}
-                            </span>
+                        <div class="pt-3 border-t border-line flex justify-between items-baseline">
+                            <span class="text-sm font-bold text-ink">Total Subtotal</span>
+                            <span class="text-xl font-bold text-pink-deep font-display">Rp{{ number_format($cart->subtotal(), 0, ',', '.') }}</span>
                         </div>
 
                         <a href="{{ route('checkout.index') }}"
-                            class="block w-full py-3 rounded-xl bg-[#D98FAF] hover:bg-[#c97e9e] text-white font-medium text-xs transition shadow-xs text-center">
-                            Lanjut ke Checkout →
-                        </a>
-
-                        <a href="{{ route('shop.index') }}"
-                            class="block w-full py-2.5 rounded-xl border border-[#EBDDE2] text-xs font-medium text-[#75686D] hover:bg-[#FFF9F5] text-center transition">
-                            ← Lanjut Berbelanja
+                            class="block w-full py-3 rounded-xl bg-pink-deep hover:bg-pink-mauve text-white font-medium text-sm transition text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-pink-deep">
+                            Lanjut ke Checkout
                         </a>
                     </div>
+                </aside>
+            </div>
+
+            {{-- Sticky summary bar (mobile/tablet) --}}
+            <div class="fixed bottom-0 inset-x-0 z-50 lg:hidden bg-white border-t border-line shadow-[0_-4px_16px_rgba(58,48,51,0.08)]">
+                <div class="px-4 py-3 flex items-center justify-between gap-4 max-w-7xl mx-auto">
+                    <div>
+                        <p class="text-[11px] text-muted leading-tight">Subtotal ({{ $cart->totalItems() }} pcs)</p>
+                        <p class="text-base font-bold text-ink leading-tight font-display">Rp{{ number_format($cart->subtotal(), 0, ',', '.') }}</p>
+                    </div>
+                    <a href="{{ route('checkout.index') }}"
+                        class="shrink-0 inline-flex items-center justify-center px-5 h-12 rounded-xl bg-pink-deep text-white font-medium text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-pink-deep active:bg-pink-mauve transition">
+                        Checkout
+                    </a>
                 </div>
             </div>
         @endif
-    </main>
-</body>
-</html>
+    </div>
+
+    <script>
+        // Quantity stepper: − / + are real submit buttons carrying their value, so the page
+        // works without JS and the browser enforces min/max natively before PATCH is sent.
+        // The number input is associated to the form via the `form` attribute (no nested forms).
+        document.querySelectorAll('[data-cart-form]').forEach(function (form) {
+            var input = form.querySelector('input[type="number"]');
+            if (!input) return;
+
+            form.addEventListener('submit', function (e) {
+                var btn = e.submitter;
+                if (btn && btn.hasAttribute('name') && btn.getAttribute('name') === 'quantity') {
+                    // Submitting a stepper button: enforce bounds client-side too (server re-checks).
+                    var v = parseInt(btn.value, 10);
+                    var min = parseInt(input.min, 10) || 1;
+                    var max = parseInt(input.max, 10) || Number.MAX_SAFE_INTEGER;
+                    if (isNaN(v) || v < min || v > max) e.preventDefault();
+                } else {
+                    // Manual typing: clamp before send.
+                    var cur = parseInt(input.value, 10);
+                    if (isNaN(cur) || cur < (parseInt(input.min, 10) || 1)) {
+                        e.preventDefault();
+                        input.value = parseInt(input.min, 10) || 1;
+                    } else if (cur > (parseInt(input.max, 10) || cur)) {
+                        input.value = input.max;
+                    }
+                }
+            });
+
+            input.addEventListener('blur', function () {
+                var min = parseInt(input.min, 10) || 1;
+                var max = parseInt(input.max, 10) || min;
+                var cur = parseInt(input.value, 10);
+                input.value = isNaN(cur) ? min : Math.min(Math.max(cur, min), max);
+            });
+        });
+    </script>
+</x-layouts.app>
