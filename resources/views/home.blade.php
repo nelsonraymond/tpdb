@@ -323,8 +323,8 @@
                                     </p>
                                 </div>
                                 <button type="button"
-                                    onclick="navigator.clipboard?.writeText('{{ $v->code }}'); this.textContent='Tersalin'; setTimeout(() => this.textContent='Salin', 2000);"
-                                    class="text-xs text-ink hover:text-pink-mauve font-medium border border-line rounded-sm px-2.5 py-1 hover:border-pink-mauve transition-colors cursor-pointer">
+                                    data-copy-code="{{ $v->code }}"
+                                    class="js-copy-code text-xs text-ink hover:text-pink-mauve font-medium border border-line rounded-sm px-2.5 py-1 hover:border-pink-mauve transition-colors cursor-pointer">
                                     Salin
                                 </button>
                             </div>
@@ -490,6 +490,57 @@
     <x-newsletter-section id="newsletter" />
 
     {{-- =========================================================================
-         13. FOOTER           ──▶ Rendered via <x-footer /> in app layout
+         13. SERVICE INFO & FAQ (anchors referenced by the footer — real content,
+             no dead links). Compact editorial strip + three honest answers.
          ========================================================================= --}}
+    <section id="layanan" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 sm:pb-16 md:pb-20">
+        <div class="grid md:grid-cols-3 gap-6 border-t border-line/70 pt-10 mt-2">
+            @php
+                $faqItems = [
+                    ['id' => 'pengiriman', 'title' => 'Pengiriman',
+                        'body' => 'Pesanan diproses dan dikirim setiap hari kerja (Senin–Sabtu) melalui kurir terpercaya ke seluruh Indonesia. Gratis ongkir untuk pesanan mulai Rp75.000. Nomor lacak dibagikan otomatis setelah pesanan diberangkatkan.'],
+                    ['id' => 'pengembalian', 'title' => 'Pengembalian & Penukaran',
+                        'body' => 'Produk belum digunakan, masih berlabel, dan dalam kemasan asli dapat dikembalikan dalam 7 hari setelah barang diterima. Hubungi tim kami untuk arrange penukaran warna atau ukuran.'],
+                    ['id' => 'faq', 'title' => 'Pertanyaan Umum',
+                        'body' => 'Ukuran dan warna nyata dapat sedikit berbeda karena pencahayaan layar — detail bahan tercantum pada setiap halaman produk. Pembayaran diproses aman saat checkout, dan status pesanan dapat dipantau kapan saja di halaman Pesanan Saya.'],
+                ];
+            @endphp
+            @foreach ($faqItems as $item)
+                <div id="{{ $item['id'] }}" class="bg-white border border-line rounded-md p-6 shadow-2xs scroll-mt-24">
+                    <p class="font-display text-base font-medium text-ink">{{ $item['title'] }}</p>
+                    <p class="mt-3 text-xs sm:text-sm text-muted leading-relaxed">{{ $item['body'] }}</p>
+                </div>
+            @endforeach
+        </div>
+    </section>
+
+    {{-- =========================================================================
+         14. FOOTER           ──▶ Rendered via <x-footer /> in app layout
+         ========================================================================= --}}
+
+    <script>
+        // Voucher code copy-to-clipboard with a graceful fallback for older browsers.
+        (function () {
+            document.querySelectorAll('.js-copy-code').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const code = this.dataset.copyCode || '';
+                    const done = () => {
+                        this.textContent = 'Tersalin';
+                        setTimeout(() => { this.textContent = 'Salin'; }, 2000);
+                    };
+                    if (navigator.clipboard?.writeText) {
+                        navigator.clipboard.writeText(code).then(done.bind(this));
+                    } else {
+                        const input = document.createElement('textarea');
+                        input.value = code;
+                        document.body.appendChild(input);
+                        input.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(input);
+                        done.call(this);
+                    }
+                });
+            });
+        })();
+    </script>
 </x-layouts.app>

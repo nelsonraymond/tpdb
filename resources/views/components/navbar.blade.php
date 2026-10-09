@@ -1,17 +1,18 @@
-{{-- Navbar — DESIGN.md §12: sticky, white/cream bg, thin bottom border, minimal shadow.
+{{-- Navbar — DESIGN.md §13: sticky, white/cream bg, thin bottom border, restrained shadow.
      Desktop: Logo | Shop | Collections | About | Journal | Search | Wishlist | Cart | Account
-     (About/Journal pages are future phases; links point to existing routes with ?page= markers so
-      the storefront can grow without dead 404s.) --}}
+     About / Journal anchor to real homepage sections (#tentang-kami, #style-journal) — no dead links. --}}
 <header id="mutya-navbar"
     class="bg-white/95 backdrop-blur border-b border-line sticky top-0 z-40 transition-shadow duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
 
         {{-- Mobile hamburger (opens dedicated MobileNav, not a collapsed desktop menu) --}}
-        <button type="button" aria-label="Buka menu" aria-controls="mutya-mobile-nav"
-            onclick="document.getElementById('mutya-mobile-nav').classList.toggle('hidden')"
-            class="md:hidden -ml-1 p-2 rounded-lg text-ink hover:bg-pink-soft/40 transition shrink-0 min-h-[40px] min-w-[40px]">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <button type="button" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="mutya-mobile-nav"
+            class="js-mobile-nav-toggle md:hidden -ml-1 p-2 rounded-lg text-ink hover:bg-pink-soft/40 transition shrink-0 min-h-[40px] min-w-[40px]">
+            <svg data-icon="open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h10"/>
+            </svg>
+            <svg data-icon="close" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-width="1.8" d="M6 6l12 12M18 6L6 18"/>
             </svg>
         </button>
 
@@ -24,8 +25,8 @@
         <nav class="hidden md:flex items-center space-x-7" aria-label="Navigasi utama">
             <x-nav-link :href="route('shop.index')" :active="request()->routeIs('shop.index')">Shop</x-nav-link>
             <x-nav-link :href="route('shop.category', 'pashmina')" :active="request()->routeIs('shop.category')">Collections</x-nav-link>
-            <x-nav-link :href="route('home').'#tentang'" :active="false">About</x-nav-link>
-            <x-nav-link :href="route('home').'#journal'" :active="false">Journal</x-nav-link>
+            <x-nav-link :href="route('home').'#tentang-kami'" :active="false">About</x-nav-link>
+            <x-nav-link :href="route('home').'#style-journal'" :active="false">Journal</x-nav-link>
         </nav>
 
         {{-- Right actions: search / wishlist / cart / account --}}
@@ -35,11 +36,19 @@
                 <label for="desktop-search" class="sr-only">Cari produk</label>
                 <input id="desktop-search" type="search" name="q" value="{{ request('q') }}"
                     placeholder="Cari hijab…"
-                    class="w-40 xl:w-48 pl-8 pr-3 py-2 rounded-xl border border-line bg-cream text-xs placeholder:text-muted/70 focus:outline-none focus:ring-1 focus:ring-pink-deep transition">
+                    class="w-40 xl:w-48 pl-8 pr-3 py-2 rounded-xl border border-line bg-cream text-xs placeholder:text-muted/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep transition">
                 <svg class="absolute left-2.5 w-4 h-4 text-muted pointer-events-none" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
                     <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/>
                 </svg>
             </form>
+
+            {{-- Mobile search icon — expands a full-width panel per DESIGN.md §13 --}}
+            <button type="button" aria-label="Buka pencarian" aria-expanded="false" aria-controls="mutya-search-panel"
+                class="js-search-toggle lg:hidden p-2 rounded-lg text-muted hover:text-pink-deep hover:bg-pink-soft/30 transition min-h-[40px] min-w-[40px] inline-flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/>
+                </svg>
+            </button>
 
             <a href="{{ route('wishlist.index') }}" class="p-2 rounded-lg text-muted hover:text-pink-deep hover:bg-pink-soft/30 transition min-h-[40px] min-w-[40px] inline-flex items-center justify-center" aria-label="Wishlist">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true">
@@ -78,15 +87,95 @@
 </header>
 
 <script>
-    // Subtle scroll state: add hairline shadow once the page scrolls (DESIGN.md §30: understated motion)
+    // Navbar interactions — scroll shadow, mobile menu, expandable search panel.
     (function () {
         const nav = document.getElementById('mutya-navbar');
-        if (!nav) return;
-        const setShadow = () => nav.classList.toggle('shadow-card', window.scrollY > 8);
-        window.addEventListener('scroll', setShadow, { passive: true });
-        setShadow();
+        const mobileNav = document.getElementById('mutya-mobile-nav');
+        const searchPanel = document.getElementById('mutya-search-panel');
+        const navToggle = nav ? nav.querySelector('.js-mobile-nav-toggle') : null;
+        const searchToggle = nav ? nav.querySelector('.js-search-toggle') : null;
+
+        // Subtle scroll state: add hairline shadow once the page scrolls (DESIGN.md §30: understated motion)
+        if (nav) {
+            const setShadow = () => nav.classList.toggle('shadow-card', window.scrollY > 8);
+            window.addEventListener('scroll', setShadow, { passive: true });
+            setShadow();
+        }
+
+        function closeSearch() {
+            if (!searchPanel || searchPanel.classList.contains('hidden')) return;
+            searchPanel.classList.add('hidden');
+            if (searchToggle) {
+                searchToggle.setAttribute('aria-expanded', 'false');
+                searchToggle.setAttribute('aria-label', 'Buka pencarian');
+            }
+        }
+
+        function closeMobileNav() {
+            if (!mobileNav || mobileNav.classList.contains('hidden')) return;
+            mobileNav.classList.add('hidden');
+            if (navToggle) {
+                navToggle.setAttribute('aria-expanded', 'false');
+                navToggle.setAttribute('aria-label', 'Buka menu navigasi');
+                navToggle.querySelector('[data-icon="open"]')?.classList.remove('hidden');
+                navToggle.querySelector('[data-icon="close"]')?.classList.add('hidden');
+            }
+        }
+
+        if (navToggle && mobileNav) {
+            navToggle.addEventListener('click', function () {
+                const isHidden = mobileNav.classList.toggle('hidden');
+                this.setAttribute('aria-expanded', String(!isHidden));
+                this.setAttribute('aria-label', isHidden ? 'Buka menu navigasi' : 'Tutup menu navigasi');
+                this.querySelector('[data-icon="open"]')?.classList.toggle('hidden', !isHidden);
+                this.querySelector('[data-icon="close"]')?.classList.toggle('hidden', isHidden);
+                closeSearch();
+            });
+        }
+
+        if (searchToggle && searchPanel) {
+            searchToggle.addEventListener('click', function () {
+                const isHidden = searchPanel.classList.toggle('hidden');
+                this.setAttribute('aria-expanded', String(!isHidden));
+                this.setAttribute('aria-label', isHidden ? 'Buka pencarian' : 'Tutup pencarian');
+                if (!isHidden) {
+                    closeMobileNav();
+                    searchPanel.querySelector('input')?.focus();
+                }
+            });
+        }
+
+        // Close the mobile menu after tapping a link (avoids sticky panels stacking on navigation)
+        if (mobileNav) {
+            mobileNav.querySelectorAll('a[href^="#"]').forEach((link) => {
+                link.addEventListener('click', closeMobileNav);
+            });
+        }
+
+        // Escape key closes both overlays
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeMobileNav();
+                closeSearch();
+            }
+        });
     })();
 </script>
+
+{{-- Expandable full-width search panel (mobile / tablet) --}}
+<div id="mutya-search-panel" class="hidden lg:hidden sticky top-16 z-30 bg-white border-b border-line shadow-card">
+    <form method="GET" action="{{ route('shop.index') }}" class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+        <label for="panel-search" class="sr-only">Cari produk</label>
+        <div class="relative flex-1">
+            <input id="panel-search" type="search" name="q" placeholder="Cari hijab, bahan, kategori…"
+                class="w-full pl-10 pr-3 py-3 rounded-xl border border-line bg-cream text-sm placeholder:text-muted/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep">
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted pointer-events-none" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/>
+            </svg>
+        </div>
+        <button type="submit" class="shrink-0 inline-flex items-center justify-center px-4 py-3 rounded-xl bg-pink-deep text-white text-sm font-medium min-h-[44px] cursor-pointer hover:bg-pink-mauve transition">Cari</button>
+    </form>
+</div>
 
 {{-- Dedicated mobile navigation panel (intentionally designed, not a collapsed desktop menu) --}}
 <div id="mutya-mobile-nav" class="hidden md:hidden sticky top-16 z-30 bg-white border-b border-line shadow-card">
@@ -95,7 +184,7 @@
         <form method="GET" action="{{ route('shop.index') }}" class="relative">
             <label for="mobile-search" class="sr-only">Cari produk</label>
             <input id="mobile-search" type="search" name="q" placeholder="Cari hijab, bahan, kategori…"
-                class="w-full pl-10 pr-3 py-3 rounded-xl border border-line bg-cream text-sm placeholder:text-muted/70 focus:outline-none focus:ring-1 focus:ring-pink-deep">
+                class="w-full pl-10 pr-3 py-3 rounded-xl border border-line bg-cream text-sm placeholder:text-muted/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep">
             <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted pointer-events-none" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/>
             </svg>
@@ -105,8 +194,8 @@
         <nav class="grid" aria-label="Navigasi mobile">
             <a href="{{ route('shop.index') }}" class="flex items-center justify-between py-3 text-sm font-medium text-ink border-b border-line/60 active:bg-pink-soft/20">Shop <span class="text-pink-deep" aria-hidden="true">→</span></a>
             <a href="{{ route('shop.category', 'pashmina') }}" class="flex items-center justify-between py-3 text-sm text-muted border-b border-line/60 active:bg-pink-soft/20">Collections <span class="text-pink-deep" aria-hidden="true">→</span></a>
-            <a href="{{ route('home') }}#tentang" class="flex items-center justify-between py-3 text-sm text-muted border-b border-line/60">About <span class="text-pink-deep" aria-hidden="true">→</span></a>
-            <a href="{{ route('home') }}#journal" class="flex items-center justify-between py-3 text-sm text-muted">Journal <span class="text-pink-deep" aria-hidden="true">→</span></a>
+            <a href="{{ route('home') }}#tentang-kami" class="flex items-center justify-between py-3 text-sm text-muted border-b border-line/60">About <span class="text-pink-deep" aria-hidden="true">→</span></a>
+            <a href="{{ route('home') }}#style-journal" class="flex items-center justify-between py-3 text-sm text-muted">Journal <span class="text-pink-deep" aria-hidden="true">→</span></a>
         </nav>
 
         {{-- Category shortcuts (real DB slugs) --}}

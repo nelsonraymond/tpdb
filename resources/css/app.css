@@ -30,6 +30,17 @@ body {
     color: var(--color-ink);
 }
 
+/* Anchor navigation lands below the sticky header (navbar h-16 + announcement bar) */
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+}
+
 .font-display {
     font-family: var(--font-display);
 }
