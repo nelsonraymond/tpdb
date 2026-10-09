@@ -12,7 +12,6 @@
         {{-- Brand --}}
         <div class="col-span-2 md:col-span-1">
             <a href="{{ route('home') }}" class="inline-flex items-center space-x-2 mb-3">
-                <span class="text-pink-deep" aria-hidden="true">❀</span>
                 <span class="font-display text-lg font-bold tracking-[0.18em] uppercase text-ink">Mutya</span>
             </a>
             <p class="text-muted text-xs leading-relaxed max-w-xs">Hijab dengan material premium dan sentuhan feminin — dibuat untuk momen sehari-hari Anda.</p>
@@ -52,7 +51,7 @@
         {{-- Newsletter --}}
         <div class="col-span-2 md:col-span-1">
             <h3 class="font-display font-semibold text-ink mb-3">Dapat 10% OFF Order Pertama</h3>
-            <form class="flex" action="#" method="POST" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Terima kasih ✦'; ">
+            <form class="flex" action="#" method="POST" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Terima kasih'; ">
                 @csrf
                 <label for="footer-newsletter-email" class="sr-only">Alamat email</label>
                 <input id="footer-newsletter-email" type="email" required placeholder="Email Anda"

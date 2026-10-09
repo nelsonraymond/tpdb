@@ -15,9 +15,8 @@
             </svg>
         </button>
 
-        {{-- Logo: floral mark + serif wordmark (§5) --}}
+        {{-- Logo: typographic serif wordmark only (DESIGN.md v3 — no floral ornaments) --}}
         <a href="{{ route('home') }}" class="inline-flex items-center space-x-2 shrink-0" aria-label="Mutya — Beranda">
-            <span class="text-pink-deep text-lg leading-none" aria-hidden="true">❀</span>
             <span class="font-display text-xl font-bold tracking-[0.18em] text-ink uppercase">Mutya</span>
         </a>
 

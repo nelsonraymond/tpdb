@@ -35,7 +35,7 @@
     <div class="absolute inset-x-0 bottom-0 p-4 sm:p-5">
         <p class="font-display text-lg sm:text-xl text-white leading-snug">{{ $category->name }}</p>
         <p class="mt-0.5 text-[11px] tracking-wide text-white/70 group-hover:text-pink-soft transition duration-300">
-            @if ($showCount){{ $category->products->count() }} pilihan · @endifBelanja →
+            @if ($showCount){{ $category->products->count() }} pilihan · @endif Belanja →
         </p>
     </div>
 </a>
