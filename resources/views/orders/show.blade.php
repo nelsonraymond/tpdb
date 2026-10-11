@@ -1,78 +1,34 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-layouts.app>
+    @section('title', 'Detail Pesanan #' . $order->order_number . ' — Mutya Store')
 
-    <title>Detail Pesanan #{{ $order->order_number }} - Mutya Store</title>
+    {{-- Stage 6: migrated to shared app layout + design tokens.
+         Backend contract unchanged: orders.show (GET) / orders.cancel (POST). --}}
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
 
-    @vite(['resources/css/app.css'])
+        {{-- Breadcrumb --}}
+        <nav aria-label="Breadcrumb" class="text-xs text-muted mb-6">
+            <ol class="flex items-center gap-1.5 flex-wrap">
+                <li><a href="{{ route('home') }}" class="hover:text-pink-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-deep rounded transition">Beranda</a></li>
+                <li aria-hidden="true">/</li>
+                <li><a href="{{ route('orders.index') }}" class="hover:text-pink-deep transition">Pesanan Saya</a></li>
+                <li aria-hidden="true">/</li>
+                <li aria-current="page" class="text-ink font-medium">#{{ $order->order_number }}</li>
+            </ol>
+        </nav>
 
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #FFF9F5;
-            color: #3A3033;
-        }
-        .font-serif-display {
-            font-family: 'Playfair Display', serif;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col bg-[#FFF9F5]">
-    <!-- Navbar -->
-    <header class="bg-white border-b border-[#EBDDE2] sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="inline-flex items-center space-x-2">
-                <span class="text-[#D98FAF] text-lg">❀</span>
-                <span class="font-serif-display text-xl font-bold tracking-wider text-[#3A3033] uppercase">MUTYA</span>
-            </a>
-
-            <div class="flex items-center space-x-4 text-sm">
-                <a href="{{ route('orders.index') }}" class="text-[#75686D] hover:text-[#3A3033] text-xs font-medium">
-                    ← Kembali ke Riwayat Pesanan
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
-        <!-- Flash Alerts -->
-        @if(session('success'))
-            <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <span class="text-emerald-500 font-bold">✓</span>
-                    <span>{{ session('success') }}</span>
-                </div>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <span class="text-rose-500 font-bold">✕</span>
-                    <span>{{ session('error') }}</span>
-                </div>
-            </div>
-        @endif
-
-        <!-- Order Header Card -->
-        <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs mb-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#EBDDE2]">
+        {{-- Order Header Card --}}
+        <div class="bg-white rounded-2xl border border-line p-6 shadow-card mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-line">
                 <div>
-                    <div class="flex items-center space-x-2 text-xs text-[#75686D] mb-1">
+                    <div class="flex items-center space-x-2 text-xs text-muted mb-1">
                         <span>Waktu Pesan:</span>
-                        <span class="text-[#3A3033] font-medium">
+                        <span class="text-ink font-medium">
                             {{ $order->placed_at ? $order->placed_at->format('d M Y, H:i') : $order->created_at->format('d M Y, H:i') }}
                         </span>
                     </div>
-                    <h1 class="font-serif-display text-xl sm:text-2xl font-bold text-[#3A3033]">
-                        Pesanan <span class="font-mono text-[#D98FAF]">#{{ $order->order_number }}</span>
+                    <h1 class="font-display text-xl sm:text-2xl font-bold text-ink">
+                        Pesanan <span class="font-mono text-pink-deep">#{{ $order->order_number }}</span>
                     </h1>
                 </div>
 
@@ -86,9 +42,9 @@
                 </div>
             </div>
 
-            <!-- Visual Order Tracking Timeline -->
+            {{-- Visual Order Tracking Timeline --}}
             <div class="pt-6">
-                <h2 class="text-xs font-semibold text-[#75686D] uppercase tracking-wider mb-5">
+                <h2 class="text-xs font-semibold text-muted uppercase tracking-wider mb-5">
                     Lacak Perjalanan Pesanan
                 </h2>
 
@@ -98,37 +54,37 @@
                         <p>Pesanan telah dibatalkan dan tidak lagi diproses. Stok telah dikembalikan ke inventaris.</p>
                     </div>
                 @else
-                    <!-- Stepper Timeline -->
+                    {{-- Stepper Timeline --}}
                     <div class="relative">
-                        <!-- Horizontal Track (desktop) -->
+                        {{-- Horizontal Track (desktop) --}}
                         <div class="hidden md:flex justify-between gap-1 relative overflow-hidden py-1">
-                            <!-- Background connecting bar (sits between first & last dot centers) -->
-                            <div class="absolute top-4 left-[calc(100%/14)] right-[calc(100%/14)] h-0.5 bg-[#EBDDE2] -z-0"></div>
+                            {{-- Background connecting bar --}}
+                            <div class="absolute top-4 left-[calc(100%/14)] right-[calc(100%/14)] h-0.5 bg-line -z-0"></div>
 
                             @foreach($order->trackingTimeline() as $step)
                                 <div class="flex flex-col items-center text-center relative z-10 flex-1 min-w-0 px-1">
-                                    <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold transition {{ $step['is_completed'] ? 'bg-[#D98FAF] text-white shadow-xs' : 'bg-white border-2 border-[#EBDDE2] text-[#75686D]' }} {{ $step['is_current'] ? 'ring-4 ring-[#D98FAF]/25' : '' }}">
+                                    <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold transition {{ $step['is_completed'] ? 'bg-pink-deep text-white shadow-card' : 'bg-white border-2 border-line text-muted' }} {{ $step['is_current'] ? 'ring-4 ring-pink-deep/25' : '' }}">
                                         @if($step['is_completed'] && ! $step['is_current'])
                                             ✓
                                         @else
                                             {{ $loop->iteration }}
                                         @endif
                                     </div>
-                                    <span class="text-xs font-semibold mt-2 leading-snug w-full break-words {{ $step['is_completed'] ? 'text-[#3A3033]' : 'text-[#75686D]' }}">
+                                    <span class="text-xs font-semibold mt-2 leading-snug w-full break-words {{ $step['is_completed'] ? 'text-ink' : 'text-muted' }}">
                                         {{ $step['title'] }}
                                     </span>
-                                    <span class="text-[10px] text-[#75686D] mt-0.5 leading-tight w-full break-words">
+                                    <span class="text-[10px] text-muted mt-0.5 leading-tight w-full break-words">
                                         {{ $step['description'] }}
                                     </span>
                                 </div>
                             @endforeach
                         </div>
 
-                        <!-- Vertical Track (mobile) -->
-                        <div class="md:hidden space-y-4 relative pl-6 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#EBDDE2]">
+                        {{-- Vertical Track (mobile) --}}
+                        <div class="md:hidden space-y-4 relative pl-6 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-line">
                             @foreach($order->trackingTimeline() as $step)
                                 <div class="relative flex items-start space-x-3">
-                                    <div class="absolute -left-6 top-0.5 w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold {{ $step['is_completed'] ? 'bg-[#D98FAF] text-white' : 'bg-white border border-[#EBDDE2] text-[#75686D]' }} {{ $step['is_current'] ? 'ring-2 ring-[#D98FAF]/30' : '' }}">
+                                    <div class="absolute -left-6 top-0.5 w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold {{ $step['is_completed'] ? 'bg-pink-deep text-white' : 'bg-white border border-line text-muted' }} {{ $step['is_current'] ? 'ring-2 ring-pink-deep/30' : '' }}">
                                         @if($step['is_completed'] && ! $step['is_current'])
                                             ✓
                                         @else
@@ -136,10 +92,10 @@
                                         @endif
                                     </div>
                                     <div class="min-w-0">
-                                        <p class="text-xs font-semibold leading-snug break-words {{ $step['is_completed'] ? 'text-[#3A3033]' : 'text-[#75686D]' }}">
+                                        <p class="text-xs font-semibold leading-snug break-words {{ $step['is_completed'] ? 'text-ink' : 'text-muted' }}">
                                             {{ $step['title'] }}
                                         </p>
-                                        <p class="text-[11px] text-[#75686D] leading-snug break-words">{{ $step['description'] }}</p>
+                                        <p class="text-[11px] text-muted leading-snug break-words">{{ $step['description'] }}</p>
                                     </div>
                                 </div>
                             @endforeach
@@ -150,42 +106,42 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <!-- Left: Order Items & Delivery Info -->
+            {{-- Left: Order Items & Delivery Info --}}
             <div class="lg:col-span-8 space-y-6">
-                <!-- Purchased Items Snapshot Card -->
-                <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs">
-                    <h2 class="font-serif-display text-base font-bold text-[#3A3033] pb-3 border-b border-[#EBDDE2] mb-4">
+                {{-- Purchased Items Snapshot Card --}}
+                <div class="bg-white rounded-2xl border border-line p-6 shadow-card">
+                    <h2 class="font-display text-base font-bold text-ink pb-3 border-b border-line mb-4">
                         Daftar Produk yang Dipesan
                     </h2>
 
-                    <div class="divide-y divide-[#EBDDE2]">
+                    <div class="divide-y divide-line">
                         @foreach($order->items as $item)
                             @php
                                 $primaryImage = $item->product?->primaryImage();
                             @endphp
                             <div class="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
-                                <div class="flex items-center space-x-3.5">
-                                    <div class="w-14 h-14 rounded-xl bg-[#FFF9F5] border border-[#EBDDE2] overflow-hidden shrink-0 flex items-center justify-center">
+                                <div class="flex items-center space-x-3.5 min-w-0">
+                                    <div class="w-14 h-14 rounded-xl bg-cream border border-line overflow-hidden shrink-0 flex items-center justify-center">
                                         @if($primaryImage)
                                             <img src="{{ asset('storage/' . $primaryImage->image_path) }}" alt="{{ $item->product_name }}" class="w-full h-full object-cover">
                                         @else
-                                            <span class="text-lg text-[#D98FAF]">❀</span>
+                                            <svg class="w-6 h-6 text-pink-deep" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                                         @endif
                                     </div>
-                                    <div>
-                                        <h3 class="font-medium text-sm text-[#3A3033]">{{ $item->product_name }}</h3>
-                                        <div class="flex items-center space-x-2 text-xs text-[#75686D] mt-0.5">
-                                            <span>Varian: <strong class="text-[#3A3033]">{{ $item->variant_name }}</strong></span>
+                                    <div class="min-w-0">
+                                        <h3 class="font-medium text-sm text-ink truncate">{{ $item->product_name }}</h3>
+                                        <div class="flex items-center space-x-2 text-xs text-muted mt-0.5 flex-wrap">
+                                            <span>Varian: <strong class="text-ink">{{ $item->variant_name }}</strong></span>
                                             <span>•</span>
                                             <span class="font-mono text-[11px]">{{ $item->sku }}</span>
                                         </div>
-                                        <p class="text-xs text-[#75686D] mt-0.5">
+                                        <p class="text-xs text-muted mt-0.5">
                                             {{ $item->quantity }} x {{ $item->formattedUnitPrice() }}
                                         </p>
                                     </div>
                                 </div>
                                 <div class="text-right shrink-0">
-                                    <span class="font-semibold text-sm text-[#3A3033]">
+                                    <span class="font-semibold text-sm text-ink">
                                         {{ $item->formattedSubtotal() }}
                                     </span>
                                 </div>
@@ -194,27 +150,27 @@
                     </div>
                 </div>
 
-                <!-- Shipping Address Card -->
-                <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs">
-                    <h2 class="font-serif-display text-base font-bold text-[#3A3033] pb-3 border-b border-[#EBDDE2] mb-4">
+                {{-- Shipping Address Card --}}
+                <div class="bg-white rounded-2xl border border-line p-6 shadow-card">
+                    <h2 class="font-display text-base font-bold text-ink pb-3 border-b border-line mb-4">
                         Alamat Pengiriman
                     </h2>
 
                     <div class="text-xs space-y-2">
                         <div class="flex items-baseline space-x-2">
-                            <span class="font-semibold text-sm text-[#3A3033]">{{ $order->shipping_recipient_name }}</span>
-                            <span class="text-[#75686D] font-mono">({{ $order->shipping_phone }})</span>
+                            <span class="font-semibold text-sm text-ink">{{ $order->shipping_recipient_name }}</span>
+                            <span class="text-muted font-mono">({{ $order->shipping_phone }})</span>
                         </div>
-                        <p class="text-sm text-[#3A3033] leading-relaxed">
+                        <p class="text-sm text-ink leading-relaxed">
                             {{ $order->shipping_address }}
                         </p>
-                        <p class="text-[#75686D]">
+                        <p class="text-muted">
                             {{ $order->shipping_city }}, {{ $order->shipping_province }} {{ $order->shipping_postal_code }}
                         </p>
 
                         @if($order->customer_note)
-                            <div class="mt-4 p-3 rounded-xl bg-[#FFF9F5] border border-[#EBDDE2] text-xs text-[#75686D]">
-                                <strong class="text-[#3A3033] block mb-0.5">Catatan Pesanan dari Anda:</strong>
+                            <div class="mt-4 p-3 rounded-xl bg-cream border border-line text-xs text-muted">
+                                <strong class="text-ink block mb-0.5">Catatan Pesanan dari Anda:</strong>
                                 {{ $order->customer_note }}
                             </div>
                         @endif
@@ -222,52 +178,52 @@
                 </div>
             </div>
 
-            <!-- Right: Shipping & Price Breakdown -->
+            {{-- Right: Shipping & Price Breakdown --}}
             <div class="lg:col-span-4 space-y-6">
-                <!-- Shipment Card -->
-                <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs">
-                    <h2 class="font-serif-display text-base font-bold text-[#3A3033] pb-3 border-b border-[#EBDDE2] mb-4">
+                {{-- Shipment Card --}}
+                <div class="bg-white rounded-2xl border border-line p-6 shadow-card">
+                    <h2 class="font-display text-base font-bold text-ink pb-3 border-b border-line mb-4">
                         Informasi Ekspedisi
                     </h2>
 
                     <div class="space-y-3 text-xs">
                         <div class="flex justify-between">
-                            <span class="text-[#75686D]">Kurir:</span>
-                            <span class="font-medium text-[#3A3033]">{{ $order->shipment?->courier ?? 'Mutya Express Delivery' }}</span>
+                            <span class="text-muted">Kurir:</span>
+                            <span class="font-medium text-ink">{{ $order->shipment?->courier ?? 'Mutya Express Delivery' }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-[#75686D]">Layanan:</span>
-                            <span class="font-medium text-[#3A3033]">{{ $order->shipment?->service ?? 'Reguler' }}</span>
+                            <span class="text-muted">Layanan:</span>
+                            <span class="font-medium text-ink">{{ $order->shipment?->service ?? 'Reguler' }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-[#75686D]">No. Resi:</span>
-                            <span class="font-mono font-medium text-[#3A3033]">
+                            <span class="text-muted">No. Resi:</span>
+                            <span class="font-mono font-medium text-ink">
                                 {{ $order->shipment?->tracking_number ?? 'Belum diterbitkan' }}
                             </span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-[#75686D]">Status Pengiriman:</span>
-                            <span class="font-medium text-[#D98FAF] uppercase">
+                            <span class="text-muted">Status Pengiriman:</span>
+                            <span class="font-medium text-pink-deep uppercase">
                                 {{ $order->shipment?->status ?? 'Menunggu Pengiriman' }}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Price Summary Card -->
-                <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs space-y-3 text-xs">
-                    <h2 class="font-serif-display text-base font-bold text-[#3A3033] pb-3 border-b border-[#EBDDE2]">
+                {{-- Price Summary Card --}}
+                <div class="bg-white rounded-2xl border border-line p-6 shadow-card space-y-3 text-xs">
+                    <h2 class="font-display text-base font-bold text-ink pb-3 border-b border-line">
                         Rincian Pembayaran
                     </h2>
 
-                    <div class="flex justify-between text-[#75686D]">
+                    <div class="flex justify-between text-muted">
                         <span>Subtotal Produk</span>
-                        <span class="font-medium text-[#3A3033]">{{ $order->formattedSubtotal() }}</span>
+                        <span class="font-medium text-ink">{{ $order->formattedSubtotal() }}</span>
                     </div>
 
-                    <div class="flex justify-between text-[#75686D]">
+                    <div class="flex justify-between text-muted">
                         <span>Biaya Pengiriman</span>
-                        <span class="font-medium text-[#3A3033]">{{ $order->formattedShippingCost() }}</span>
+                        <span class="font-medium text-ink">{{ $order->formattedShippingCost() }}</span>
                     </div>
 
                     @if($order->discount_amount > 0)
@@ -277,22 +233,33 @@
                         </div>
                     @endif
 
-                    <div class="pt-3 border-t border-[#EBDDE2] flex justify-between items-baseline text-sm">
-                        <span class="font-bold text-[#3A3033]">Total Akhir</span>
-                        <span class="font-serif-display text-lg font-bold text-[#D98FAF]">
+                    <div class="pt-3 border-t border-line flex justify-between items-baseline text-sm">
+                        <span class="font-bold text-ink">Total Akhir</span>
+                        <span class="font-display text-lg font-bold text-pink-deep">
                             {{ $order->formattedGrandTotal() }}
                         </span>
                     </div>
                 </div>
 
+                {{-- Payment Action --}}
+                @if($order->status === 'pending' && $order->payment_status !== 'paid')
+                    <a href="{{ route('payments.show', $order) }}"
+                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-pink-deep hover:bg-pink-mauve text-white text-sm font-semibold transition shadow-card hover:shadow-card-hover min-h-[44px]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+                        </svg>
+                        Lanjutkan Pembayaran
+                    </a>
+                @endif
+
+                {{-- Cancellation Card --}}
                 @if($order->isCancellable())
-                    <!-- Customer Cancellation Card -->
-                    <div class="bg-white rounded-2xl border border-[#EBDDE2] p-6 shadow-xs">
-                        <h2 class="font-serif-display text-base font-bold text-[#3A3033] pb-3 border-b border-[#EBDDE2] mb-4">
+                    <div class="bg-white rounded-2xl border border-line p-6 shadow-card">
+                        <h2 class="font-display text-base font-bold text-ink pb-3 border-b border-line mb-4">
                             Perlu Membatalkan?
                         </h2>
 
-                        <p class="text-xs text-[#75686D] leading-relaxed mb-4">
+                        <p class="text-xs text-muted leading-relaxed mb-4">
                             Pembatalan hanya tersedia sebelum pesanan dikirim. Stok produk akan otomatis dikembalikan setelah pesanan dibatalkan.
                         </p>
 
@@ -308,18 +275,17 @@
                     </div>
                 @endif
 
-                <div class="text-center pt-2">
+                <div class="text-center pt-2 space-y-2">
+                    <a href="{{ route('orders.index') }}"
+                        class="block text-xs text-muted hover:text-pink-deep font-medium transition">
+                        ← Kembali ke Riwayat Pesanan
+                    </a>
                     <a href="{{ route('shop.index') }}"
-                        class="text-xs text-[#75686D] hover:text-[#D98FAF] font-medium transition">
-                        ← Lanjutkan Berbelanja
+                        class="block text-xs text-muted hover:text-pink-deep font-medium transition">
+                        Lanjutkan Berbelanja
                     </a>
                 </div>
             </div>
         </div>
-    </main>
-
-    <footer class="mt-auto bg-white border-t border-[#EBDDE2] py-6 text-center text-xs text-[#75686D]">
-        <p>&copy; {{ date('Y') }} Mutya Store. Soft Luxury Hijab Boutique.</p>
-    </footer>
-</body>
-</html>
+    </div>
+</x-layouts.app>

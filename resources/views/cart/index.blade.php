@@ -24,7 +24,7 @@
 
         {{-- Field-level validation errors from CartService (e.g. quantity melebihi stok) --}}
         @if ($errors->any())
-            <div role="alert" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-sm text-rose-800">
+            <div role="alert" aria-live="assertive" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-sm text-rose-800">
                 <p class="font-semibold mb-1">Periksa kembali:</p>
                 <ul class="list-disc list-inside text-xs space-y-1">
                     @foreach ($errors->all() as $error)

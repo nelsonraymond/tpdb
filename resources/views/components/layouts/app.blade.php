@@ -21,7 +21,7 @@
 
     {{-- ============ FLASH MESSAGES (toast style per §34) ============ --}}
     @if (session('success') || session('status'))
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" aria-live="polite">
             <div class="mutya-rise bg-white border border-line rounded-xl shadow-card px-4 py-3 text-sm text-ink flex items-start gap-2">
                 <span class="text-pink-deep font-semibold" aria-hidden="true">✓</span>
                 <span>{{ session('success') ?? session('status') }}</span>
@@ -29,7 +29,7 @@
         </div>
     @endif
     @if (session('error'))
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" aria-live="polite">
             <div class="mutya-rise bg-white border border-rose-200 rounded-xl shadow-card px-4 py-3 text-sm text-rose-700 flex items-start gap-2">
                 <span class="font-semibold" aria-hidden="true">!</span>
                 <span>{{ session('error') }}</span>

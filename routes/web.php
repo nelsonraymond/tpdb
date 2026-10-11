@@ -14,6 +14,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CustomerAuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WishlistController;
@@ -38,6 +39,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [CustomerAuthController::class, 'store'])->name('login.submit');
     Route::get('/register', [CustomerAuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [CustomerAuthController::class, 'register'])->name('register.submit');
+
+    // Forgot Password & Reset Password
+    Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
 // Customer Authenticated Routes

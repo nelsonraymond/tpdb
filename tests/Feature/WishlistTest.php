@@ -107,4 +107,29 @@ class WishlistTest extends TestCase
         // Trying to create or toggle again cannot create a duplicate row
         $this->assertEquals(1, Wishlist::where('user_id', $customer->id)->where('product_id', $product->id)->count());
     }
+
+    public function test_navbar_displays_wishlist_counter_for_authenticated_customer(): void
+    {
+        $customer = User::factory()->customer()->create();
+        $product1 = $this->createProduct();
+        $product2 = $this->createProduct();
+
+        Wishlist::create(['user_id' => $customer->id, 'product_id' => $product1->id]);
+        Wishlist::create(['user_id' => $customer->id, 'product_id' => $product2->id]);
+
+        $response = $this->actingAs($customer)->get(route('home'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Wishlist');
+        // Both navbar desktop and mobile render count 2
+        $response->assertSee('>2<', false);
+    }
+
+    public function test_navbar_does_not_display_wishlist_counter_for_guest(): void
+    {
+        $response = $this->get(route('home'));
+
+        $response->assertStatus(200);
+        $response->assertDontSee('>99+<', false);
+    }
 }

@@ -50,10 +50,11 @@
                 </svg>
             </button>
 
-            <a href="{{ route('wishlist.index') }}" class="p-2 rounded-lg text-muted hover:text-pink-deep hover:bg-pink-soft/30 transition min-h-[40px] min-w-[40px] inline-flex items-center justify-center" aria-label="Wishlist">
+            <a href="{{ route('wishlist.index') }}" class="relative p-2 rounded-lg text-muted hover:text-pink-deep hover:bg-pink-soft/30 transition min-h-[40px] min-w-[40px] inline-flex items-center justify-center" aria-label="Wishlist">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 20s-7-4.6-9.2-9A5.2 5.2 0 0112 6.5 5.2 5.2 0 0121.2 11C19 15.4 12 20 12 20z"/>
                 </svg>
+                <x-wishlist-badge-count />
             </a>
 
             <a href="{{ route('cart.index') }}" class="relative p-2 rounded-lg text-muted hover:text-pink-deep hover:bg-pink-soft/30 transition min-h-[40px] min-w-[40px] inline-flex items-center justify-center" aria-label="Keranjang">
@@ -215,10 +216,18 @@
         <div class="pt-1 border-t border-line grid">
             @auth
                 <a href="{{ route('orders.index') }}" class="py-3 text-sm text-ink border-b border-line/60">Pesanan Saya</a>
-                <a href="{{ route('profile') }}" class="py-3 text-sm text-ink border-b border-line/60">Akun Saya</a>
+                <a href="{{ route('wishlist.index') }}" class="py-3 text-sm text-ink border-b border-line/60 flex items-center justify-between">
+                    <span>Wishlist Saya</span>
+                    @php $wishlistMobileCount = auth()->user()->wishlists()->count(); @endphp
+                    @if ($wishlistMobileCount > 0)
+                        <span class="min-w-[20px] h-5 px-1.5 rounded-full bg-pink-deep text-white text-[10px] font-semibold flex items-center justify-center">{{ $wishlistMobileCount }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('addresses.index') }}" class="py-3 text-sm text-ink border-b border-line/60">Buku Alamat</a>
+                <a href="{{ route('profile') }}" class="py-3 text-sm text-ink border-b border-line/60">Profil Saya</a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="py-3 text-sm text-muted text-left cursor-pointer">Keluar</button>
+                    <button type="submit" class="py-3 text-sm text-muted text-left cursor-pointer w-full">Keluar</button>
                 </form>
             @else
                 <div class="grid grid-cols-2 gap-3 pt-2">

@@ -145,5 +145,54 @@ class CustomerAuthTest extends TestCase
         $response->assertSee('Siti Aminah');
         $response->assertSee('siti@example.com');
         $response->assertSee('customer');
+        $response->assertSee(route('orders.index'));
+        $response->assertSee(route('addresses.index'));
+        $response->assertSee(route('wishlist.index'));
+    }
+
+    public function test_guest_cannot_logout(): void
+    {
+        $response = $this->post(route('logout'));
+        $response->assertRedirect(route('login'));
+    }
+
+    public function test_customer_can_view_forgot_password_page(): void
+    {
+        $response = $this->get(route('password.request'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Lupa Kata Sandi');
+    }
+
+    public function test_customer_can_request_password_reset_link(): void
+    {
+        $user = User::factory()->customer()->create([
+            'email' => 'customer_reset@example.com',
+        ]);
+
+        $response = $this->post(route('password.email'), [
+            'email' => 'customer_reset@example.com',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('status');
+    }
+
+    public function test_requesting_reset_for_nonexistent_email_does_not_leak_enumeration(): void
+    {
+        $response = $this->post(route('password.email'), [
+            'email' => 'doesnotexist@example.com',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('status');
+    }
+
+    public function test_customer_can_view_reset_password_page(): void
+    {
+        $response = $this->get(route('password.reset', ['token' => 'sample-token', 'email' => 'user@example.com']));
+
+        $response->assertStatus(200);
+        $response->assertSee('Kata Sandi Baru');
     }
 }

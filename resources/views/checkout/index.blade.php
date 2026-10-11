@@ -26,7 +26,7 @@
 
         {{-- General + field errors (address_id, shipping_method, cart) --}}
         @if ($errors->any())
-            <div role="alert" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm space-y-1">
+            <div role="alert" aria-live="assertive" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm space-y-1">
                 <p class="font-semibold text-rose-900">Periksa kesalahan sebelum melanjutkan:</p>
                 <ul class="list-disc list-inside text-xs space-y-1">
                     @foreach ($errors->all() as $error)
@@ -287,9 +287,10 @@
                     <p class="text-[11px] text-muted leading-tight">Total Pembayaran</p>
                     <p id="bar-grand-total" class="text-base font-bold text-ink leading-tight font-display">Rp{{ number_format($grandTotal, 0, ',', '.') }}</p>
                 </div>
-                <button type="submit" form="checkout-form"
+                <button id="checkout-submit" type="submit" form="checkout-form"
                     {{ $addresses->isEmpty() ? 'disabled' : '' }}
                     class="shrink-0 inline-flex items-center justify-center px-5 h-12 rounded-xl bg-pink-deep text-white font-medium text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-pink-deep active:bg-pink-mauve disabled:bg-stone-300 disabled:cursor-not-allowed transition">
+                    <svg class="spinner hidden mr-2 h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
                     Buat Pesanan
                 </button>
             </div>
@@ -338,6 +339,16 @@
                     });
                 });
             });
+            // Prevent double submission and show loading spinner
+            var form = document.getElementById('checkout-form');
+            var submitBtn = document.getElementById('checkout-submit');
+            if (form && submitBtn) {
+                form.addEventListener('submit', function () {
+                    submitBtn.disabled = true;
+                    var spinner = submitBtn.querySelector('.spinner');
+                    if (spinner) spinner.classList.remove('hidden');
+                });
+            }
         });
     </script>
 </x-layouts.app>
